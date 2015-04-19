@@ -1,6 +1,5 @@
 
 #include <util.h>
-#include <alloca.h>
 #include <common.h>
 #include <errlog.h>
 #include <rmd160.h>
@@ -10,7 +9,12 @@
 #include <string>
 #include <stdio.h>
 #include <string.h>
+#ifdef WIN32
+#include <time_port.h>
+#include <algorithm> // for std::min
+#else
 #include <sys/time.h>
+#endif // WIN32
 #include <openssl/bn.h>
 #include <openssl/ecdsa.h>
 #include <openssl/obj_mac.h>
@@ -417,7 +421,7 @@ bool addrToHash160(
     while(0==bigNumStart[0] && bigNumStart<checkSumStart) ++bigNumStart;
 
     ptrdiff_t bigNumSize = bigNumEnd - bigNumStart;
-    ptrdiff_t padSize = kRIPEMD160ByteSize - bigNumSize;
+    ptrdiff_t padSize = (ptrdiff_t)kRIPEMD160ByteSize - bigNumSize;
     if(0<padSize) {
         if(0<bigNumSize) memcpy(padSize + hash160, bigNumStart, bigNumSize);
         memset(hash160, 0, padSize);
@@ -740,7 +744,7 @@ std::string pr128(
     uint128_t x = y;
     while(1) {
         *(p--) = (char)((x % 10) + '0');
-        if(unlikely(0==x)) break;
+        if(unlikely(x==0)) break;
         x /= 10;
     }
     ++p;

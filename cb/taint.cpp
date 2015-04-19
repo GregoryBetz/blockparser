@@ -140,7 +140,7 @@ struct Taint:public Callback
 
         Number taint = 0;
              if(unlikely(isSrcTX))    taint = 1;
-        else if(0<txTotal && 0<txBad) taintMap[txHash] = taint = txBad/txTotal;
+        else if(txTotal>0 && 0<txBad) taintMap[txHash] = taint = txBad/txTotal;
 
         if(threshold<taint) {
             printNumber(taint);

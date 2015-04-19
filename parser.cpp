@@ -8,8 +8,6 @@
 #include <vector>
 #include <fcntl.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -31,6 +29,8 @@ static Block *gNullBlock;
 static int64_t gMaxHeight;
 static uint64_t gChainSize;
 static uint256_t gNullHash;
+
+static const size_t gHeightLimit = 1200000;
 
 #if defined BITCOIN
     static const size_t gHeaderSize = 80;
@@ -498,7 +498,12 @@ static void findBlockParent(
     Block *b
 )
 {
-    auto where = lseek64(
+    auto where =
+#ifdef WIN32
+        _lseeki64(
+#else
+        lseek64(
+#endif // WIN32
         b->chunk->getMap()->fd,
         b->chunk->getOffset(),
         SEEK_SET
@@ -660,8 +665,8 @@ static void buildBlockHeaders() {
     const auto startTime = usecs();
     const auto oneMeg = 1024 * 1024;
 
-    for(const auto &map : mapVec) {
-
+    for (auto mapIt = mapVec.cbegin(); mapIt != mapVec.cend(); ++mapIt) {
+        const Map& map = *mapIt;
         startMap(0);
 
         while(1) {
@@ -670,6 +675,9 @@ static void buildBlockHeaders() {
             if(nbRead<(signed)sz) {
                 break;
             }
+            
+            if (nbBlocks >= gHeightLimit)
+                break;
 
             startBlock((uint8_t*)0);
 
@@ -715,6 +723,8 @@ static void buildBlockHeaders() {
         fflush(stderr);
 
         endMap(0);
+        if (nbBlocks >= gHeightLimit)
+            break;
     }
 
     if(0==nbBlocks) {
@@ -754,8 +764,8 @@ static void initHashtables() {
     gBlockMap.setEmptyKey(empty);
 
     gChainSize = 0;
-    for(const auto &map : mapVec) {
-        gChainSize += map.size;
+    for (auto mapIt = mapVec.cbegin(); mapIt != mapVec.cend(); ++mapIt) {
+        gChainSize += mapIt->size;
     }
 
     auto txPerBytes = (52149122.0 / 26645195995.0);
@@ -774,9 +784,13 @@ static std::string getNormalizedDirName(
     const std::string &dirName
 ) {
 
+#ifdef WIN32
+    auto r = dirName;
+#else
     auto t = canonicalize_file_name(dirName.c_str());
     auto r = std::string(t);
     free(t);
+#endif // WIN32
 
     auto sz = r.size();
     if(0<sz) {
@@ -797,9 +811,12 @@ static std::string getBlockchainDir() {
         }
     }
     return getNormalizedDirName(
-        dir              +
+        std::string(dir)
+#ifndef WIN32
+        +
         std::string("/") +
         kCoinDirName
+#endif // WIN32
     );
 }
 
@@ -811,6 +828,11 @@ static void makeBlockMaps() {
 
     struct stat statBuf;
     auto r = stat(blockDir.c_str(), &statBuf);
+
+#ifndef S_ISDIR
+# define S_ISDIR(ST_MODE) (((ST_MODE)& _S_IFMT) == _S_IFDIR)
+#endif
+
     auto oldStyle = (r<0 || !S_ISDIR(statBuf.st_mode));
 
     int blkDatId = (oldStyle ? 1 : 0);
@@ -825,7 +847,11 @@ static void makeBlockMaps() {
             std::string(buf)
         ;
 
-        auto blockMapFD = open(blockMapFileName.c_str(), O_RDONLY);
+        auto blockMapFD = open(blockMapFileName.c_str(), O_RDONLY
+            #ifdef WIN32
+                | O_BINARY
+            #endif // WIN32
+                );
         if(blockMapFD<0) {
             if(1<blkDatId) {
                 break;
@@ -846,6 +872,7 @@ static void makeBlockMaps() {
         }
 
         auto mapSize = statBuf.st_size;
+#ifndef WIN32
         auto st1 = posix_fadvise(blockMapFD, 0, mapSize, POSIX_FADV_NOREUSE);
         if(st1<0) {
             warning(
@@ -853,6 +880,7 @@ static void makeBlockMaps() {
                 blockMapFileName.c_str()
             );
         }
+#endif // WIN32
 
         Map map;
         map.size = mapSize;
@@ -863,7 +891,8 @@ static void makeBlockMaps() {
 }
 
 static void cleanMaps() {
-    for(const auto &map : mapVec) {
+    for (auto mapIt = mapVec.cbegin(); mapIt != mapVec.cend(); ++mapIt) {
+        auto map = *mapIt;
         auto r = close(map.fd);
         if(r<0) {
             sysErr(

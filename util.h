@@ -7,14 +7,33 @@
     #include <errlog.h>
     #include <rmd160.h>
     #include <sha256.h>
+#ifdef WIN32
+    #include <uint128_t.h>
+    #include <io.h>
+    #include <time_port.h>
+#else
     #include <unistd.h>
+#endif // WIN32
+
+//std::unordered_map
+#define DENSE_SWITCH 0
+//sparse_hash_map
+//#define DENSE_SWITCH 2
+//std::map
+//#define DENSE_SWITCH 3
+
+#ifdef WIN32
+#define BITCOIN
+#endif // WIN32
 
     typedef const uint8_t *Hash160;
     typedef const uint8_t *Hash256;
     struct uint160_t { uint8_t v[kRIPEMD160ByteSize]; };
     struct uint256_t { uint8_t v[   kSHA256ByteSize]; };
+#ifndef WIN32
     typedef signed int int128_t __attribute__((mode(TI)));
     typedef unsigned int uint128_t __attribute__((mode(TI)));
+#endif // WIN32
     struct Hash160Hasher { uint64_t operator()( const Hash160 &hash160) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash160); const uint64_t *p = reinterpret_cast<const uint64_t*>(i); return p[0]; } };
     struct Hash256Hasher { uint64_t operator()( const Hash256 &hash256) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash256); const uint64_t *p = reinterpret_cast<const uint64_t*>(i); return p[0]; } };
 
@@ -67,7 +86,7 @@
         static uint8_t *alloc() {
             if(unlikely(poolEnd<=pool)) {
                 pool = (uint8_t*)malloc(kPageByteSize);
-                poolEnd = kPageByteSize + pool;
+                poolEnd = pool + kPageByteSize;
             }
             uint8_t *result = pool;
             pool += sizeof(T);
@@ -105,7 +124,11 @@
 
         const uint8_t *getData() const {
             if(likely(0==data)) {
+                #ifdef WIN32
+                auto where = _lseeki64(map->fd, offset, SEEK_SET);
+                #else
                 auto where = lseek64(map->fd, offset, SEEK_SET);
+                #endif // WIN32
                 if(where!=(signed)offset) {
                     sysErrFatal(
                         "failed to seek into block chain file %s",
@@ -224,7 +247,7 @@
             };
         };
 
-    #endif
+    #endif // WANT_DENSE
 
     #define SKIP(type, var, p)       \
         p += sizeof(type)            \

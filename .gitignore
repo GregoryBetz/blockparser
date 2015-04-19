@@ -1,0 +1,11 @@
+*.obj
+*.tlog
+*.d
+*.o
+Debug/*
+blockparser.opensdf
+blockparser.v12.suo
+blockparser.vcxproj.user
+blockparser.vcxproj.filters
+parser
+blockparser.sdf

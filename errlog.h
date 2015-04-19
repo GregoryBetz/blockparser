@@ -46,7 +46,11 @@
         fflush(stdout);
         fflush(stderr);
 
+#ifdef WIN32
+        if(fatal) exit(1);
+#else
         if(fatal) abort();
+#endif // WIN32
     }
 
     static inline void sysErr(

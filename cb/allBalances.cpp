@@ -141,10 +141,10 @@ struct AllBalances:public Callback
         allAddrs.reserve(15 * 1000 * 1000);
 
         optparse::Values &values = parser.parse_args(argc, argv);
-        cutoffBlock = values.get("atBlock");
-        showAddr = values.get("withAddr");
+        cutoffBlock = (int)values.get("atBlock");
+        showAddr = (int)values.get("withAddr");
         detailed = values.get("detailed");
-        limit = values.get("limit");
+        limit = (int)values.get("limit");
         csv = values.get("csv");
 
         auto args = parser.args();
