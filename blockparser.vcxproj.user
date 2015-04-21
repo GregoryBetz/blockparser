@@ -6,4 +6,10 @@
     <LocalDebuggerEnvironment>BLOCKCHAIN_DIR=E:\Coindata\Bitcoin
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LocalDebuggerCommandArguments>simpleStats</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerEnvironment>BLOCKCHAIN_DIR=E:\Coindata\Bitcoin
+</LocalDebuggerEnvironment>
+  </PropertyGroup>
 </Project>
