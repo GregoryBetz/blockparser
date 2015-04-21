@@ -22,10 +22,6 @@
 //std::map
 //#define DENSE_SWITCH 3
 
-#ifdef WIN32
-#define BITCOIN
-#endif // WIN32
-
     typedef const uint8_t *Hash160;
     typedef const uint8_t *Hash256;
     struct uint160_t { uint8_t v[kRIPEMD160ByteSize]; };
