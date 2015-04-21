@@ -1,0 +1,160 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="cb">
+      <UniqueIdentifier>{3f30119f-a7ca-4820-9f6c-cc623c7e408c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scrypt">
+      <UniqueIdentifier>{567bba57-36d1-41db-bf8d-569d5a2fc4d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h9">
+      <UniqueIdentifier>{025c8810-dcbb-4cfc-95fd-f6200f9f0bd5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="cb\allBalances.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\closure.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\dumpTX.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\help.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\pristine.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\rawdump.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\rewards.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\simpleStats.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\sql.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\taint.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\transactions.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="scrypt\pbkdf2.cpp">
+      <Filter>scrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="scrypt\scrypt.cpp">
+      <Filter>scrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\aes_helper.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\blake.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\bmw.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\cubehash.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\echo.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\groestl.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\jh.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\keccak.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\luffa.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\shavite.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\simd.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\skein.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="callback.cpp" />
+    <ClCompile Include="opcodes.cpp" />
+    <ClCompile Include="option.cpp" />
+    <ClCompile Include="parser.cpp" />
+    <ClCompile Include="rmd160.cpp" />
+    <ClCompile Include="sha256.cpp" />
+    <ClCompile Include="time_port.cpp" />
+    <ClCompile Include="uint128_t.cpp" />
+    <ClCompile Include="util.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="scrypt\scrypt.h">
+      <Filter>scrypt</Filter>
+    </ClInclude>
+    <ClInclude Include="scrypt\pbkdf2.h">
+      <Filter>scrypt</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\h9.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_blake.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_bmw.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_cubehash.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_echo.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_groestl.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_jh.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_keccak.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_luffa.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_shavite.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_simd.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_skein.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_types.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\uint256.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="util.h" />
+    <ClInclude Include="callback.h" />
+    <ClInclude Include="common.h" />
+    <ClInclude Include="errlog.h" />
+    <ClInclude Include="opcodes.h" />
+    <ClInclude Include="option.h" />
+    <ClInclude Include="rmd160.h" />
+    <ClInclude Include="sha256.h" />
+    <ClInclude Include="time_port.h" />
+    <ClInclude Include="uint128_t.h" />
+  </ItemGroup>
+</Project>
