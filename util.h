@@ -171,7 +171,7 @@
             uint64_t       _offset      
         ) {
             chunk = Chunk::alloc();
-            chunk->init(_map, _size, _offset);
+            chunk->init(_map, _size, (size_t)_offset);
 
             hash = _hash;
             height = -1;
@@ -338,7 +338,7 @@
         const uint8_t *buf,
         uint64_t      size
     ) {
-        sha256(sha, buf, size);
+        sha256(sha, buf, (size_t)size);
         sha256(sha, sha, kSHA256ByteSize);
     }
 

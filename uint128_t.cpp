@@ -22,7 +22,7 @@ uint128_t uint128_t::operator=(const uint128_t & rhs){
 }
 
 uint128_t::operator bool() const{
-    return (bool) (UPPER | LOWER);
+    return (UPPER | LOWER) != 0;
 }
 
 uint128_t::operator char() const{
@@ -50,18 +50,18 @@ uint128_t::operator uint64_t() const{
 
 uint128_t::operator double() const
 {
-	double rvo = UPPER;
-	rvo *= 1 << 32;
-	rvo *= 1 << 32;
+    double rvo = (double)UPPER;
+	rvo *= (uint64_t)1 << 32;
+    rvo *= (uint64_t)1 << 32;
 	rvo += LOWER;
     return rvo;
 }
 
 uint128_t::operator long double() const
 {
-    long double rvo = UPPER;
-	rvo *= 1 << 32;
-	rvo *= 1 << 32;
+    long double rvo = (long double)UPPER;
+    rvo *= (uint64_t)1 << 32;
+    rvo *= (uint64_t)1 << 32;
 	rvo += LOWER;
     return rvo;
 }
@@ -102,7 +102,7 @@ uint128_t uint128_t::operator~() const{
 
 uint128_t uint128_t::operator<<(const uint128_t & rhs) const{
     uint64_t shift = rhs.LOWER;
-    if (((bool) rhs.UPPER) || (shift >= 128)){
+    if ((rhs.UPPER != 0) || (shift >= 128)){
         return uint128_0;
     }
     else if (shift == 64){
@@ -124,7 +124,7 @@ uint128_t uint128_t::operator<<(const uint128_t & rhs) const{
 
 uint128_t uint128_t::operator>>(const uint128_t & rhs) const{
     uint64_t shift = rhs.LOWER;
-    if (((bool) rhs.UPPER) || (shift >= 128)){
+    if ((rhs.UPPER != 0) || (shift >= 128)){
         return uint128_0;
     }
     else if (shift == 64){
@@ -155,7 +155,7 @@ uint128_t uint128_t::operator>>=(const uint128_t & rhs){
 }
 
 bool uint128_t::operator!() const{
-    return !(bool) (UPPER | LOWER);
+    return (UPPER | LOWER) == 0;
 }
 
 bool uint128_t::operator&&(const uint128_t & rhs) const{

@@ -50,7 +50,7 @@ class uint128_t{
 
         template <typename T> uint128_t(const T & rhs){
             UPPER = 0;
-            LOWER = rhs;
+            LOWER = (uint64_t)rhs;
         }
 
         template <typename S, typename T> uint128_t(const S & upper_rhs, const T & lower_rhs){

@@ -100,7 +100,7 @@ struct Taint:public Callback
         }
 
         static uint8_t empty[kSHA256ByteSize] = { 0x42 };
-        static uint64_t sz = 15 * 1000 * 1000;
+        static unsigned int sz = 15 * 1000 * 1000;
         srcTxMap.setEmptyKey(empty);
         taintMap.setEmptyKey(empty);
         taintMap.resize(sz);

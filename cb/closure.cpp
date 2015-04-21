@@ -147,7 +147,7 @@ struct Closure:public Callback
                 count = 1;
             } else {
                 uint64_t addrIndex = j->second;
-                uint64_t homeComponentIndex = cc[addrIndex];
+                uint64_t homeComponentIndex = cc[(unsigned int)addrIndex];
                 for(size_t k=0; likely(k<cc.size()); ++k) {
                     uint64_t componentIndex = cc[k];
                     if(unlikely(homeComponentIndex==componentIndex)) {
@@ -179,7 +179,7 @@ struct Closure:public Callback
             for(size_t i=1; unlikely(i<size); ++i) {
                 uint64_t a = vertices[i-1];
                 uint64_t b = vertices[i-0];
-                boost::add_edge(a, b, graph);
+                boost::add_edge((unsigned int)a, (unsigned int)b, graph);
             }
         }
     }

@@ -37,7 +37,7 @@ template<> uint8_t *PagedAllocator<Chunk>::poolEnd = 0;
 double usecs() {
     struct timeval t;
     gettimeofday(&t, 0);
-    return t.tv_usec + 1000000*((uint64_t)t.tv_sec);
+    return double(t.tv_usec + 1000000*((uint64_t)t.tv_sec));
 }
 
 void toHex(
@@ -152,7 +152,7 @@ void showScript(
             else if(likely(77==c)) { LOAD(uint16_t, v, p); dataSize = v; }
             else if(likely(78==c)) { LOAD(uint32_t, v, p); dataSize = v; }
             printf("         %sOP_PUSHDATA(%" PRIu64 ", 0x", indent, dataSize);
-            showHex(p, dataSize, false);
+            showHex(p, (size_t)dataSize, false);
 
             printf(
                 ")%s\n",
@@ -549,7 +549,7 @@ void hash160ToAddr(
         if(!r) errFatal("BN_div failed");
         BN_copy(num, div);
 
-        uint32_t digit = BN_get_word(rem);
+        uint32_t digit = uint32_t(BN_get_word(rem));
         *(p++) = b58Digits[digit];
     }
 
@@ -645,7 +645,6 @@ void loadKeyList(
         size_t sz = strlen(buf);
         if('\n'==buf[sz-1]) buf[sz-1] = 0;
 
-        uint160_t h160;
         bool ok = addAddr(result, (uint8_t*)buf, verbose);
         if(ok) {
             ++found;

@@ -702,7 +702,7 @@ static void buildBlockHeaders() {
             endBlock((uint8_t*)0);
             ++nbBlocks;
         }
-        baseOffset += map.size;
+        baseOffset += (size_t)map.size;
 
         auto now = usecs();
         auto elapsed = now - startTime;
