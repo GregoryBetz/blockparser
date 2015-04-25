@@ -250,19 +250,40 @@ all:parser
 	@${CPLUS} -MD ${INC} ${COPT}  -c parser.cpp -o .objs/parser.o
 	@mv .objs/parser.d .deps
 
-.objs/rmd160.o : rmd160.cpp
-	@echo c++ -- rmd160.cpp
+.objs/ripemd160.o : crypto/ripemd160.cpp
+	@echo c++ -- crypto/ripemd160.cpp
 	@mkdir -p .deps
 	@mkdir -p .objs
-	@${CPLUS} -MD ${INC} ${COPT}  -c rmd160.cpp -o .objs/rmd160.o
-	@mv .objs/rmd160.d .deps
+	@${CPLUS} -MD ${INC} ${COPT}  -c crypto/ripemd160.cpp -o .objs/ripemd160.o
+	@mv .objs/ripemd160.d .deps
 
-.objs/sha256.o : sha256.cpp
-	@echo c++ -- sha256.cpp
+.objs/rmd160port.o : rmd160port.cpp
+	@echo c++ -- rmd160port.cpp
 	@mkdir -p .deps
 	@mkdir -p .objs
-	@${CPLUS} -MD ${INC} ${COPT}  -c sha256.cpp -o .objs/sha256.o
+	@${CPLUS} -MD ${INC} ${COPT}  -c rmd160port.cpp -o .objs/rmd160port.o
+	@mv .objs/rmd160port.d .deps
+
+.objs/sha256.o : crypto/sha256.cpp
+	@echo c++ -- crypto/sha256.cpp
+	@mkdir -p .deps
+	@mkdir -p .objs
+	@${CPLUS} -MD ${INC} ${COPT}  -c crypto/sha256.cpp -o .objs/sha256.o
 	@mv .objs/sha256.d .deps
+
+.objs/sha256port.o : sha256port.cpp
+	@echo c++ -- sha256port.cpp
+	@mkdir -p .deps
+	@mkdir -p .objs
+	@${CPLUS} -MD ${INC} ${COPT}  -c sha256port.cpp -o .objs/sha256port.o
+	@mv .objs/sha256port.d .deps
+
+.objs/base58.o : crypto/base58.cpp
+	@echo c++ -- crypto/base58.cpp
+	@mkdir -p .deps
+	@mkdir -p .objs
+	@${CPLUS} -MD ${INC} ${COPT}  -c crypto/base58.cpp -o .objs/base58.o
+	@mv .objs/base58.d .deps
 
 .objs/util.o : util.cpp
 	@echo c++ -- util.cpp
@@ -302,8 +323,11 @@ OBJS=                       \
     .objs/opcodes.o         \
     .objs/option.o          \
     .objs/parser.o          \
-    .objs/rmd160.o          \
+    .objs/ripemd160.o       \
+    .objs/rmd160port.o      \
     .objs/sha256.o          \
+    .objs/sha256port.o      \
+    .objs/base58.o          \
     .objs/util.o            \
 
 parser:${OBJS}
