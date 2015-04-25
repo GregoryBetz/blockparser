@@ -15,7 +15,7 @@
 
 struct Addr;
 static uint8_t emptyKey[kSHA256ByteSize] = { 0x52 };
-typedef HashMap<Hash160, Addr*, Hash160Hasher, Hash160Equal>::Map AddrMap;
+typedef HashMap<TypedHash160, Addr*, TypedHash160Hasher, TypedHash160Equal>::Map AddrMap;
 typedef HashMap<Hash160, int, Hash160Hasher, Hash160Equal>::Map RestrictMap;
 
 struct Output {
@@ -33,7 +33,7 @@ struct Addr
     uint64_t sum;
     uint64_t nbIn;
     uint64_t nbOut;
-    uint160_t hash;
+    uint168_t hash;
     uint32_t lastIn;
     uint32_t lastOut;
     OutputVec *outputVec;
@@ -192,9 +192,10 @@ struct AllBalances:public Callback
     )
     {
         uint8_t addrType[3];
-        uint160_t pubKeyHash;
+        uint168_t pubKeyHash;
         int type = solveOutputScript(pubKeyHash.v, script, scriptSize, addrType);
         if(unlikely(type<0)) return;
+        pubKeyHash.v[kRIPEMD160ByteSize] = type == 3 ? 5 : 0;
 
         if(0!=restrictMap.size()) {
             auto r = restrictMap.find(pubKeyHash.v);
@@ -211,7 +212,7 @@ struct AllBalances:public Callback
 
             addr = allocAddr();
 
-            memcpy(addr->hash.v, pubKeyHash.v, kRIPEMD160ByteSize);
+            memcpy(addr->hash.v, pubKeyHash.v, 1+kRIPEMD160ByteSize);
             addr->outputVec = 0;
             addr->nbOut = 0;
             addr->nbIn = 0;
@@ -366,7 +367,7 @@ struct AllBalances:public Callback
             } else {
                 if(i<showAddr || 0!=nbRestricts) {
                     uint8_t buf[64];
-                    hash160ToAddr(buf, addr->hash.v);
+                    hash160ToAddr(buf, addr->hash.v, addr->hash.v[kRIPEMD160ByteSize]);
                     printf(" %s", buf);
                 } else {
                     printf(" XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");

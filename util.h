@@ -16,14 +16,17 @@
 #endif // WIN32
 
     typedef const uint8_t *Hash160;
+    typedef const uint8_t *TypedHash160;
     typedef const uint8_t *Hash256;
-    struct uint160_t { uint8_t v[kRIPEMD160ByteSize]; };
-    struct uint256_t { uint8_t v[   kSHA256ByteSize]; };
+    struct uint160_t { uint8_t v[  kRIPEMD160ByteSize]; };
+    struct uint168_t { uint8_t v[1+kRIPEMD160ByteSize]; };
+    struct uint256_t { uint8_t v[     kSHA256ByteSize]; };
 #ifndef WIN32
     typedef signed int int128_t __attribute__((mode(TI)));
     typedef unsigned int uint128_t __attribute__((mode(TI)));
 #endif // WIN32
     struct Hash160Hasher { uint64_t operator()( const Hash160 &hash160) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash160); const uint64_t *p = reinterpret_cast<const uint64_t*>(i); return p[0]; } };
+    struct TypedHash160Hasher { uint64_t operator()(const TypedHash160 &hash160) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash160); const uint64_t *p = reinterpret_cast<const uint64_t*>(i); return p[0]; } };
     struct Hash256Hasher { uint64_t operator()( const Hash256 &hash256) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash256); const uint64_t *p = reinterpret_cast<const uint64_t*>(i); return p[0]; } };
 
     struct Hash160Equal {
@@ -42,6 +45,15 @@
             const uint32_t *b1 = reinterpret_cast<const uint32_t *>(ib);
             if(unlikely(a1[4]!=b1[4])) return false;
             return true;
+        }
+    };
+
+    struct TypedHash160Equal {
+        bool operator()(
+            const TypedHash160 &ha,
+            const TypedHash160 &hb
+        ) const {
+            return memcmp(ha, hb, 1 + kRIPEMD160ByteSize) == 0;
         }
     };
 
