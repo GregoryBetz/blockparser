@@ -430,9 +430,7 @@ struct AllBalances:public Callback
         curBlock = b;
 
         const uint8_t *p = b->chunk->getData();
-        const uint8_t *sz = -4 + p;
-        LOAD(uint32_t, size, sz);
-        offset += size;
+        offset += b->chunk->getSize();
 
         double now = usecs();
         static double startTime = 0;
@@ -446,7 +444,7 @@ struct AllBalances:public Callback
                 startTime = now;
             }
 
-            double progress = offset/(double)chainSize;
+            double progress = (double)offset / (double)chainSize;
             double elasedSinceStart = 1e-6*(now - startTime);
             double speed = progress / elasedSinceStart;
             info(
