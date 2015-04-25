@@ -1,6 +1,8 @@
 
 // Dump the transitive closure of a bunch of addresses
 
+#ifdef __HAS_BOOST__
+
 #include <util.h>
 #include <common.h>
 #include <errlog.h>
@@ -187,3 +189,4 @@ struct Closure:public Callback
 
 static Closure closure;
 
+#endif // __HAS_BOOST__
