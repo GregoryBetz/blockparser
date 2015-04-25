@@ -15,12 +15,11 @@
 #else
 #include <sys/time.h>
 #endif // WIN32
-#include <openssl/bn.h>
+#include <crypto/base58.h>
 #include <openssl/ecdsa.h>
 #include <openssl/obj_mac.h>
 
 const uint8_t hexDigits[] = "0123456789abcdef";
-const uint8_t b58Digits[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 template<> uint8_t *PagedAllocator<Block>::pool = 0;
 template<> uint8_t *PagedAllocator<Block>::poolEnd = 0;
@@ -369,71 +368,17 @@ bool addrToHash160(
              bool verbose
 )
 {
-    static BIGNUM *sum = 0;
-    static BN_CTX *ctx = 0;
-    if(unlikely(!ctx)) {
-        ctx = BN_CTX_new();
-        BN_CTX_init(ctx);
-        sum = BN_new();
-    }
-
-    BN_zero(sum);
-    while(1) {
-        uint8_t c = *(addr++);
-        if(unlikely(0==c)) break;
-
-        uint8_t dg = fromB58Digit(c);
-        BN_mul_word(sum, 58);
-        BN_add_word(sum, dg);
-    }
-
-    uint8_t buf[4 + 2 + kRIPEMD160ByteSize + 4];
-    size_t size = BN_bn2mpi(sum, 0);
-    if(sizeof(buf)<size) {
-        warning(
-            "BN_bn2mpi returned weird buffer size %d, expected %d\n",
-            (int)size,
-            (int)sizeof(buf)
-        );
-        return false;
-    }
-
-    BN_bn2mpi(sum, buf);
-
-    uint32_t recordedSize = 
-        (buf[0]<<24)    |
-        (buf[1]<<16)    |
-        (buf[2]<< 8)    |
-        (buf[3]<< 0);
-    if(size!=(4+recordedSize)) {
-        warning(
-            "BN_bn2mpi returned bignum size %d, expected %d\n",
-            (int)recordedSize,
-            (int)size-4
-        );
-        return false;
-    }
-
-    uint8_t *bigNumEnd;
-    uint8_t *dataEnd = size + buf;
-    uint8_t *bigNumStart = 4 + buf;
-    uint8_t *checkSumStart = bigNumEnd = (-4 + dataEnd);
-    while(0==bigNumStart[0] && bigNumStart<checkSumStart) ++bigNumStart;
-
-    ptrdiff_t bigNumSize = bigNumEnd - bigNumStart;
-    ptrdiff_t padSize = (ptrdiff_t)kRIPEMD160ByteSize - bigNumSize;
-    if(0<padSize) {
-        if(0<bigNumSize) memcpy(padSize + hash160, bigNumStart, bigNumSize);
-        memset(hash160, 0, padSize);
-    } else {
-        memcpy(hash160, bigNumStart - padSize, kRIPEMD160ByteSize);
-    }
+    std::vector<unsigned char> vchRet;
+    DecodeBase58((const char*)addr, vchRet);
+    memcpy(hash160, &vchRet[1], kRIPEMD160ByteSize);
 
     bool hashOK = true;
     if(checkHash) {
+        uint8_t checkSum[4];
+        memcpy(checkSum, &vchRet[1 + kRIPEMD160ByteSize], 4);
 
-        uint8_t data[1+kRIPEMD160ByteSize];
-        memcpy(1+data, hash160, kRIPEMD160ByteSize);
+        uint8_t data[1 + kRIPEMD160ByteSize];
+        memcpy(1 + data, hash160, kRIPEMD160ByteSize);
 
         #if defined(PROTOSHARES)
             uint8_t type = 56
@@ -483,17 +428,17 @@ bool addrToHash160(
         sha256Twice(sha, data, 1+kRIPEMD160ByteSize);
 
         hashOK =
-            sha[0]==checkSumStart[0]  &&
-            sha[1]==checkSumStart[1]  &&
-            sha[2]==checkSumStart[2]  &&
-            sha[3]==checkSumStart[3];
+            sha[0]==checkSum[0]  &&
+            sha[1]==checkSum[1]  &&
+            sha[2]==checkSum[2]  &&
+            sha[3]==checkSum[3];
 
         if(!hashOK) {
             warning(
                 "checksum of address %s failed. Expected 0x%x%x%x%x, got 0x%x%x%x%x.",
                 addr,
-                checkSumStart[0], checkSumStart[1], checkSumStart[2], checkSumStart[3],
-                sha[0],           sha[1],           sha[2],           sha[3]
+                checkSum[0], checkSum[1], checkSum[2], checkSum[3],
+                sha[0],      sha[1],      sha[2],      sha[3]
             );
         }
     }
@@ -507,68 +452,19 @@ void hash160ToAddr(
           uint8_t type
 )
 {
-    uint8_t buf[4 + 2 + kRIPEMD160ByteSize + kSHA256ByteSize];
-    const uint32_t size = 4 + 2 + kRIPEMD160ByteSize;
-    buf[ 0] = (size>>24) & 0xff;
-    buf[ 1] = (size>>16) & 0xff;
-    buf[ 2] = (size>> 8) & 0xff;
-    buf[ 3] = (size>> 0) & 0xff;
-    buf[ 4] = 0;
-    buf[ 5] = type;
-    memcpy(4 + 2 + buf, hash160, kRIPEMD160ByteSize);
+    uint8_t buf[1 + kRIPEMD160ByteSize + kSHA256ByteSize];
+    const uint32_t size = 4 + 1 + kRIPEMD160ByteSize;
+    buf[0] = type;
+    memcpy(1 + buf, hash160, kRIPEMD160ByteSize);
     sha256Twice(
-        4 + 2 + kRIPEMD160ByteSize + buf,
-        4 + 1 + buf,
+        1 + kRIPEMD160ByteSize + buf,
+        buf,
         1 + kRIPEMD160ByteSize
-    );
+        );
 
-    static BIGNUM *b58 = 0;
-    static BIGNUM *num = 0;
-    static BIGNUM *div = 0;
-    static BIGNUM *rem = 0;
-    static BN_CTX *ctx = 0;
-
-    if(!ctx)
-    {
-        ctx = BN_CTX_new();
-        BN_CTX_init(ctx);
-
-        b58 = BN_new();
-        num = BN_new();
-        div = BN_new();
-        rem = BN_new();
-        BN_set_word(b58, 58);
-    }
-
-    BN_mpi2bn(buf, 4+size, num);
-
-    uint8_t *p = addr;
-    while(!BN_is_zero(num))
-    {
-        int r = BN_div(div, rem, num, b58, ctx);
-        if(!r) errFatal("BN_div failed");
-        BN_copy(num, div);
-
-        uint32_t digit = uint32_t(BN_get_word(rem));
-        *(p++) = b58Digits[digit];
-    }
-
-    const uint8_t *a =                          (5+buf);
-    const uint8_t *e = 1 + kRIPEMD160ByteSize + (5+buf);
-    while(a<e && 0==a[0])
-    {
-        *(p++) = b58Digits[0];
-        ++a;
-    }
-    *(p--) = 0;
-
-    while(addr<p)
-    {
-        uint8_t a = *addr;
-        uint8_t b = *p;
-        *(addr++) = b;
-        *(p--) = a;
-    }
+    std::string encoded = EncodeBase58(buf, buf + size);
+    memcpy(addr, encoded.c_str(), encoded.size());
+    addr[encoded.size()] = 0;
 }
 
 bool guessHash160(
