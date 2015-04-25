@@ -9,7 +9,7 @@
 #include <callback.h>
 
 static uint8_t empty[kSHA256ByteSize] = { 0x42 };
-typedef GoogMap<Hash256, uint64_t, Hash256Hasher, Hash256Equal>::Map OutputMap;
+typedef HashMap<Hash256, uint64_t, Hash256Hasher, Hash256Equal>::Map OutputMap;
 
 struct SQLDump:public Callback
 {

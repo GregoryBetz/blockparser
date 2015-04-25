@@ -15,13 +15,6 @@
     #include <unistd.h>
 #endif // WIN32
 
-//std::unordered_map
-#define DENSE_SWITCH 0
-//sparse_hash_map
-//#define DENSE_SWITCH 2
-//std::map
-//#define DENSE_SWITCH 3
-
     typedef const uint8_t *Hash160;
     typedef const uint8_t *Hash256;
     struct uint160_t { uint8_t v[kRIPEMD160ByteSize]; };
@@ -184,7 +177,7 @@
         }
     };
 
-    #if defined(WANT_DENSE)
+    #if defined DENSE_HASH
 
         // Faster, uses more RAM
         #include <google/dense_hash_map>
@@ -195,7 +188,7 @@
             typename Hasher,
             typename Equal
         >
-        struct GoogMap {
+        struct HashMap {
 
             typedef google::dense_hash_map<
                 Key,
@@ -214,7 +207,7 @@
             };
         };
 
-    #else
+    #elif defined SPARSE_HASH
 
         // Slower, uses less RAM
         #include <google/sparse_hash_map>
@@ -225,7 +218,7 @@
             typename Hasher,
             typename Equal
         >
-        struct GoogMap {
+        struct HashMap {
 
             typedef google::sparse_hash_map<
                 Key,
@@ -243,7 +236,32 @@
             };
         };
 
-    #endif // WANT_DENSE
+    #else
+    
+        #include <unordered_map>
+        template<
+            typename Key,
+            typename Value,
+            typename Hasher,
+            typename Equal
+        >
+        struct HashMap {
+
+            typedef std::unordered_map<
+                Key,
+                Value,
+                Hasher,
+                Equal
+            > MapBase;
+
+            struct Map:public MapBase {
+                void setEmptyKey(const Key &){}
+                void set_deleted_key(const Key &){}
+                void resize(uint64_t) {}
+            };
+        };
+
+    #endif
 
     #define SKIP(type, var, p)       \
         p += sizeof(type)            \

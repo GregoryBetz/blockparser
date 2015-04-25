@@ -11,11 +11,12 @@
 
 #include <vector>
 #include <string.h>
+#include <algorithm>
 
 struct Addr;
 static uint8_t emptyKey[kSHA256ByteSize] = { 0x52 };
-typedef GoogMap<Hash160, Addr*, Hash160Hasher, Hash160Equal>::Map AddrMap;
-typedef GoogMap<Hash160, int, Hash160Hasher, Hash160Equal>::Map RestrictMap;
+typedef HashMap<Hash160, Addr*, Hash160Hasher, Hash160Equal>::Map AddrMap;
+typedef HashMap<Hash160, int, Hash160Hasher, Hash160Equal>::Map RestrictMap;
 
 struct Output {
     int64_t time;

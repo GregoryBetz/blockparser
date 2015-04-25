@@ -29,8 +29,8 @@
 #include <callback.h>
 
 typedef long double Number;
-typedef GoogMap<Hash256, int, Hash256Hasher, Hash256Equal >::Map TxMap;
-typedef GoogMap<Hash256, Number, Hash256Hasher, Hash256Equal >::Map TaintMap;
+typedef HashMap<Hash256, int, Hash256Hasher, Hash256Equal >::Map TxMap;
+typedef HashMap<Hash256, Number, Hash256Hasher, Hash256Equal >::Map TaintMap;
 
 static inline void printNumber(
     const Number &x

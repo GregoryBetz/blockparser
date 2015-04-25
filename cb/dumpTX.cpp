@@ -7,7 +7,7 @@
 #include <string.h>
 #include <callback.h>
 
-typedef GoogMap<Hash256, int, Hash256Hasher, Hash256Equal >::Map TxMap;
+typedef HashMap<Hash256, int, Hash256Hasher, Hash256Equal >::Map TxMap;
 
 struct DumpTX:public Callback
 {

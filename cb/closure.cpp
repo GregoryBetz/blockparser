@@ -15,7 +15,7 @@
 
 typedef uint160_t Addr;
 static uint8_t gEmptyKey[kRIPEMD160ByteSize] = { 0x52 };
-typedef GoogMap<Hash160, uint64_t, Hash160Hasher, Hash160Equal >::Map AddrMap;
+typedef HashMap<Hash160, uint64_t, Hash160Hasher, Hash160Equal >::Map AddrMap;
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> Graph;
 
 struct Closure:public Callback

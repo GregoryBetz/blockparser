@@ -8,7 +8,7 @@
 #include <option.h>
 #include <callback.h>
 
-typedef GoogMap<Hash256, uint64_t, Hash256Hasher, Hash256Equal >::Map TxMap;
+typedef HashMap<Hash256, uint64_t, Hash256Hasher, Hash256Equal >::Map TxMap;
 
 struct Pristine:public Callback
 {

@@ -12,7 +12,7 @@
 #include <callback.h>
 
 static uint8_t emptyKey[kRIPEMD160ByteSize] = { 0x52 };
-typedef GoogMap<Hash160, int, Hash160Hasher, Hash160Equal>::Map AddrMap;
+typedef HashMap<Hash160, int, Hash160Hasher, Hash160Equal>::Map AddrMap;
 
 struct Transactions:public Callback
 {

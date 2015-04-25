@@ -11,8 +11,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-typedef GoogMap<Hash256, Chunk*, Hash256Hasher, Hash256Equal>::Map TXOMap;
-typedef GoogMap<Hash256, Block*, Hash256Hasher, Hash256Equal>::Map BlockMap;
+typedef HashMap<Hash256, Chunk*, Hash256Hasher, Hash256Equal>::Map TXOMap;
+typedef HashMap<Hash256, Block*, Hash256Hasher, Hash256Equal>::Map BlockMap;
 
 static bool gNeedTXHash;
 static Callback *gCallback;
