@@ -658,7 +658,7 @@ static void buildBlockHeaders() {
     info("pass 1 -- walk all blocks and build headers ...");
 
     size_t nbBlocks = 0;
-    size_t baseOffset = 0;
+    uint64_t baseOffset = 0;
     size_t earlyMissCnt = 0;
     uint8_t buf[8+gHeaderSize];
     const auto sz = sizeof(buf);
