@@ -5,8 +5,8 @@
 #include <common.h>
 #include <errlog.h>
 #include <option.h>
-#include <rmd160.h>
-#include <sha256.h>
+#include <rmd160port.h>
+#include <sha256port.h>
 #include <callback.h>
 
 #include <vector>

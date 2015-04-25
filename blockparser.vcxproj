@@ -94,6 +94,9 @@
     <ClCompile Include="cb\sql.cpp" />
     <ClCompile Include="cb\taint.cpp" />
     <ClCompile Include="cb\transactions.cpp" />
+    <ClCompile Include="crypto\base58.cpp" />
+    <ClCompile Include="crypto\ripemd160.cpp" />
+    <ClCompile Include="crypto\sha256.cpp" />
     <ClCompile Include="h9\aes_helper.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -145,10 +148,10 @@
     <ClCompile Include="opcodes.cpp" />
     <ClCompile Include="option.cpp" />
     <ClCompile Include="parser.cpp" />
-    <ClCompile Include="rmd160.cpp" />
+    <ClCompile Include="rmd160port.cpp" />
     <ClCompile Include="scrypt\pbkdf2.cpp" />
     <ClCompile Include="scrypt\scrypt.cpp" />
-    <ClCompile Include="sha256.cpp" />
+    <ClCompile Include="sha256port.cpp" />
     <ClCompile Include="time_port.cpp" />
     <ClCompile Include="uint128_t.cpp" />
     <ClCompile Include="util.cpp" />
@@ -156,6 +159,10 @@
   <ItemGroup>
     <ClInclude Include="callback.h" />
     <ClInclude Include="common.h" />
+    <ClInclude Include="crypto\base58.h" />
+    <ClInclude Include="crypto\common.h" />
+    <ClInclude Include="crypto\ripemd160.h" />
+    <ClInclude Include="crypto\sha256.h" />
     <ClInclude Include="errlog.h" />
     <ClInclude Include="h9\h9.h" />
     <ClInclude Include="h9\sph_blake.h" />
@@ -189,10 +196,10 @@
     <ClInclude Include="openssl\stack.h" />
     <ClInclude Include="openssl\symhacks.h" />
     <ClInclude Include="option.h" />
-    <ClInclude Include="rmd160.h" />
+    <ClInclude Include="rmd160port.h" />
     <ClInclude Include="scrypt\pbkdf2.h" />
     <ClInclude Include="scrypt\scrypt.h" />
-    <ClInclude Include="sha256.h" />
+    <ClInclude Include="sha256port.h" />
     <ClInclude Include="uint128_t.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="time_port.h" />

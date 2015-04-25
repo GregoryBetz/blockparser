@@ -7,7 +7,7 @@
 #include <common.h>
 #include <errlog.h>
 #include <option.h>
-#include <rmd160.h>
+#include <rmd160port.h>
 #include <string.h>
 #include <callback.h>
 

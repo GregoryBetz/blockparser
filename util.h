@@ -5,8 +5,8 @@
     #include <vector>
     #include <common.h>
     #include <errlog.h>
-    #include <rmd160.h>
-    #include <sha256.h>
+    #include <rmd160port.h>
+    #include <sha256port.h>
 #ifdef WIN32
     #include <uint128_t.h>
     #include <io.h>
