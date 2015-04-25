@@ -432,8 +432,8 @@
     bool addrToHash160(
               uint8_t *hash160,
         const uint8_t *addr,
-                 bool checkHash = false,
-                 bool verbose = true
+              uint8_t &type,
+                 bool checkHash = false
     );
 
     bool guessHash160(

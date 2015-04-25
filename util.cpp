@@ -364,8 +364,8 @@ uint8_t fromB58Digit(
 bool addrToHash160(
           uint8_t *hash160,
     const uint8_t *addr,
-             bool checkHash,
-             bool verbose
+          uint8_t &type,
+             bool checkHash
 )
 {
     std::vector<unsigned char> vchRet;
@@ -393,7 +393,7 @@ bool addrToHash160(
         #endif
 
         #if defined(BITCOIN)
-            data[0] = 0;
+            data[0] = type;
         #endif
         
         #if defined(FEDORACOIN)
@@ -487,7 +487,8 @@ bool guessHash160(
         return true;
     }
 
-    return addrToHash160(hash160, addr, true, verbose);
+    uint8_t type;
+    return addrToHash160(hash160, addr, type, true);
 }
 
 static bool addAddr(
