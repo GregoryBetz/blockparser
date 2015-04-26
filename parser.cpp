@@ -18,7 +18,7 @@ static bool gNeedTXHash;
 static Callback *gCallback;
 
 static const Map *gCurMap;
-static std::vector<Map> mapVec;
+static std::vector<Map*> mapVec;
 
 static TXOMap gTXOMap;
 static BlockMap gBlockMap;
@@ -666,12 +666,12 @@ static void buildBlockHeaders() {
     const auto oneMeg = 1024 * 1024;
 
     for (auto mapIt = mapVec.cbegin(); mapIt != mapVec.cend(); ++mapIt) {
-        const Map& map = *mapIt;
+        const Map* map = *mapIt;
         startMap(0);
 
         while(1) {
 
-            auto nbRead = read(map.fd, buf, sz);
+            auto nbRead = read(map->fd, buf, sz);
             if(nbRead<(signed)sz) {
                 break;
             }
@@ -690,19 +690,19 @@ static void buildBlockHeaders() {
                 break;
             }
 
-            auto where = lseek(map.fd, (blockSize + 8) - sz, SEEK_CUR);
+            auto where = lseek(map->fd, (blockSize + 8) - sz, SEEK_CUR);
             auto blockOffset = where - blockSize;
             if(where<0) {
                 break;
             }
 
             auto block = Block::alloc();
-            block->init(hash, &map, blockSize, prevBlock, blockOffset);
+            block->init(hash, map, blockSize, prevBlock, blockOffset);
             gBlockMap[hash] = block;
             endBlock((uint8_t*)0);
             ++nbBlocks;
         }
-        baseOffset += (size_t)map.size;
+        baseOffset += (size_t)map->size;
 
         auto now = usecs();
         auto elapsed = now - startTime;
@@ -765,7 +765,7 @@ static void initHashtables() {
 
     gChainSize = 0;
     for (auto mapIt = mapVec.cbegin(); mapIt != mapVec.cend(); ++mapIt) {
-        gChainSize += mapIt->size;
+        gChainSize += (*mapIt)->size;
     }
 
     auto txPerBytes = (52149122.0 / 26645195995.0);
@@ -882,10 +882,10 @@ static void makeBlockMaps() {
         }
 #endif // WIN32
 
-        Map map;
-        map.size = mapSize;
-        map.fd = blockMapFD;
-        map.name = blockMapFileName;
+        Map* map = new Map();
+        map->size = statBuf.st_size;
+        map->fd = blockMapFD;
+        map->name = blockMapFileName;
         mapVec.push_back(map);
     }
 }
@@ -893,11 +893,11 @@ static void makeBlockMaps() {
 static void cleanMaps() {
     for (auto mapIt = mapVec.cbegin(); mapIt != mapVec.cend(); ++mapIt) {
         auto map = *mapIt;
-        auto r = close(map.fd);
+        auto r = close(map->fd);
         if(r<0) {
             sysErr(
                 "failed to close block chain file %s",
-                map.name.c_str()
+                map->name.c_str()
             );
         }
     }

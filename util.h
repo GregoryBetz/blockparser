@@ -99,9 +99,13 @@
     static inline uint8_t *allocHash160() { return PagedAllocator<uint160_t>::alloc(); }
 
     struct Map {
+        Map(){}
         int fd;
         uint64_t size;
         std::string name;
+    private: // dont copy
+        Map(const Map&);
+        Map& operator=(const Map&);
     };
 
     struct Chunk {
