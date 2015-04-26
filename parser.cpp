@@ -16,9 +16,7 @@ typedef HashMap<Hash256, Block*, Hash256Hasher, Hash256Equal>::Map BlockMap;
 
 static bool gNeedTXHash;
 static Callback *gCallback;
-
-static const Map *gCurMap;
-static std::vector<Map*> mapVec;
+static std::vector<CacheableMap*> mapVec;
 
 static TXOMap gTXOMap;
 static BlockMap gBlockMap;
@@ -498,33 +496,26 @@ static void findBlockParent(
     Block *b
 )
 {
-    auto where =
-#ifdef WIN32
-        _lseeki64(
-#else
-        lseek64(
-#endif // WIN32
-        b->chunk->getMap()->fd,
+    auto where = b->chunk->getMap()->mapSeek(
         b->chunk->getOffset(),
         SEEK_SET
     );
     if(where!=(signed)b->chunk->getOffset()) {
         sysErrFatal(
             "failed to seek into block chain file %s",
-            b->chunk->getMap()->name.c_str()
+            b->chunk->getMap()->mName.c_str()
         );
     }
 
     uint8_t buf[gHeaderSize];
-    auto nbRead = read(
-        b->chunk->getMap()->fd,
+    auto nbRead = b->chunk->getMap()->mapRead(
         buf,
         gHeaderSize
     );
     if(nbRead<(signed)gHeaderSize) {
         sysErrFatal(
             "failed to read from block chain file %s",
-            b->chunk->getMap()->name.c_str()
+            b->chunk->getMap()->mName.c_str()
         );
     }
 
@@ -666,12 +657,12 @@ static void buildBlockHeaders() {
     const auto oneMeg = 1024 * 1024;
 
     for (auto mapIt = mapVec.cbegin(); mapIt != mapVec.cend(); ++mapIt) {
-        const Map* map = *mapIt;
+        auto map = *mapIt;
         startMap(0);
 
         while(1) {
 
-            auto nbRead = read(map->fd, buf, sz);
+            auto nbRead = map->mapRead(buf, sz);
             if(nbRead<(signed)sz) {
                 break;
             }
@@ -690,7 +681,7 @@ static void buildBlockHeaders() {
                 break;
             }
 
-            auto where = lseek(map->fd, (blockSize + 8) - sz, SEEK_CUR);
+            auto where = map->mapSeek((blockSize + 8) - sz, SEEK_CUR);
             auto blockOffset = where - blockSize;
             if(where<0) {
                 break;
@@ -702,7 +693,7 @@ static void buildBlockHeaders() {
             endBlock((uint8_t*)0);
             ++nbBlocks;
         }
-        baseOffset += (size_t)map->size;
+        baseOffset += (size_t)map->mSize;
 
         auto now = usecs();
         auto elapsed = now - startTime;
@@ -765,7 +756,7 @@ static void initHashtables() {
 
     gChainSize = 0;
     for (auto mapIt = mapVec.cbegin(); mapIt != mapVec.cend(); ++mapIt) {
-        gChainSize += (*mapIt)->size;
+        gChainSize += (*mapIt)->mSize;
     }
 
     auto txPerBytes = (52149122.0 / 26645195995.0);
@@ -882,10 +873,10 @@ static void makeBlockMaps() {
         }
 #endif // WIN32
 
-        Map* map = new Map();
-        map->size = statBuf.st_size;
-        map->fd = blockMapFD;
-        map->name = blockMapFileName;
+        CacheableMap* map = new CacheableMap();
+        map->mSize = statBuf.st_size;
+        map->mFd = blockMapFD;
+        map->mName = blockMapFileName;
         mapVec.push_back(map);
     }
 }
@@ -893,11 +884,11 @@ static void makeBlockMaps() {
 static void cleanMaps() {
     for (auto mapIt = mapVec.cbegin(); mapIt != mapVec.cend(); ++mapIt) {
         auto map = *mapIt;
-        auto r = close(map->fd);
+        auto r = close(map->mFd);
         if(r<0) {
             sysErr(
                 "failed to close block chain file %s",
-                map->name.c_str()
+                map->mName.c_str()
             );
         }
     }

@@ -3,6 +3,7 @@
 
     #include <string>
     #include <vector>
+    #include <algorithm>
     #include <common.h>
     #include <errlog.h>
     #include <rmd160port.h>
@@ -98,26 +99,105 @@
     static inline uint8_t *allocHash256() { return PagedAllocator<uint256_t>::alloc(); }
     static inline uint8_t *allocHash160() { return PagedAllocator<uint160_t>::alloc(); }
 
-    struct Map {
-        Map(){}
-        int fd;
-        uint64_t size;
-        std::string name;
+    struct CacheableMap {
+        CacheableMap(){}
+        int mFd;
+        size_t mSize;
+        std::string mName;
+        static CacheableMap* OneLoadedMap;
+        size_t mOffset = 0;
+
+        int mapRead(uint8_t *_buf, int _size)
+        {
+            int length = std::min((int)_size, (int)mSize - (int)mOffset);
+            if (length > 0)
+            {
+                memcpy(_buf, getData(mOffset), length);
+                mOffset += length;
+            }
+            return length;
+        }
+
+        int mapSeek(size_t _offset, int _type)
+        {
+            if (_type == SEEK_SET)
+            {
+                mOffset = _offset;
+            }
+            else if (_type == SEEK_CUR)
+            {
+                mOffset += _offset;
+            }
+            else
+            {
+                warning("unknows seek type: %d", _type);
+            }
+            //info("lseek _offset %d, mOffset %d, mSize %d", _offset, mOffset, mSize);
+            if (mOffset <= mSize)
+            {
+                return mOffset;
+            }
+            return -1;
+        }
+
+        const uint8_t *getData(size_t _offset) {
+            if (likely(0 == mData)) {
+                #ifdef WIN32
+                auto where = _lseeki64(mFd, 0, SEEK_SET);
+                #else
+                auto where = lseek64(mFd, 0, SEEK_SET);
+                #endif // WIN32
+                if (where != 0) {
+                    sysErrFatal(
+                        "failed to seek into block chain file %s",
+                        mName.c_str()
+                        );
+                }
+                mData = (uint8_t*)malloc(mSize);
+
+                auto sz = read(mFd, mData, mSize);
+                if (sz != (signed)mSize) {
+                    sysErrFatal(
+                        "can't map block %s",
+                        mName.c_str()
+                        );
+                }
+            }
+            if (OneLoadedMap != this)
+            {
+                if (OneLoadedMap != NULL)
+                {
+                    OneLoadedMap->releaseData();
+                }
+                OneLoadedMap = this;
+            }
+            return &mData[_offset];
+        }
+        void releaseData() {
+            if (OneLoadedMap == this)
+            {
+                OneLoadedMap = NULL;
+            }
+            free(mData);
+            mData = 0;
+        }
+
     private: // dont copy
-        Map(const Map&);
-        Map& operator=(const Map&);
+        CacheableMap(const CacheableMap&);
+        CacheableMap& operator=(const CacheableMap&);
+        uint8_t *mData = 0;
     };
 
     struct Chunk {
     private:
-        const Map *map;
+        CacheableMap *map;
         size_t size;
         size_t offset;
         mutable uint8_t *data;
 
     public:
         void init(
-            const Map *_map,
+            CacheableMap *_map,
             size_t _size,
             size_t _offset
         ) {
@@ -129,20 +209,16 @@
 
         const uint8_t *getData() const {
             if(likely(0==data)) {
-                #ifdef WIN32
-                auto where = _lseeki64(map->fd, offset, SEEK_SET);
-                #else
-                auto where = lseek64(map->fd, offset, SEEK_SET);
-                #endif // WIN32
+                auto where = map->mapSeek(offset, SEEK_SET);
                 if(where!=(signed)offset) {
                     sysErrFatal(
                         "failed to seek into block chain file %s",
-                        map->name.c_str()
+                        map->mName.c_str()
                     );
                 }
                 data = (uint8_t*)malloc(size);
 
-                auto sz = read(map->fd, data, size);
+                auto sz = map->mapRead(data, size);
                 if(sz!=(signed)size) {
                     //fatal("can't map block");
                 }
@@ -157,7 +233,7 @@
 
         size_t getSize() const    { return size;   }
         size_t getOffset() const  { return offset; }
-        const Map *getMap() const { return map;    }
+        CacheableMap *getMap()    { return map; }
 
         static Chunk *alloc() {
             return (Chunk*)PagedAllocator<Chunk>::alloc();
@@ -174,7 +250,7 @@
 
         void init(
             const uint8_t *_hash,
-            const Map     *_map,
+            CacheableMap *_map,
             size_t         _size,
             Block         *_prev,
             uint64_t       _offset      

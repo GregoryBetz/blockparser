@@ -92,7 +92,7 @@ struct RawDump:public Callback {
         printf(
             "%smap = '%s'\n",
             spaces,
-            b->chunk->getMap()->name.c_str()
+            b->chunk->getMap()->mName.c_str()
         );
 
         printf("%sblockHash = '", spaces);

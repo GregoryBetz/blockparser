@@ -11,7 +11,6 @@
 
 #include <vector>
 #include <string.h>
-#include <algorithm>
 
 struct Addr;
 static uint8_t emptyKey[kSHA256ByteSize] = { 0x52 };

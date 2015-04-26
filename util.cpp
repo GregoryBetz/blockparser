@@ -888,3 +888,4 @@ void writeEscapedBinaryBuffer(
     }
 }
 
+CacheableMap* CacheableMap::OneLoadedMap = NULL;
