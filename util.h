@@ -219,21 +219,26 @@
             offset = _offset;
         }
 
-        const uint8_t *getData() const {
-            if(likely(0==data)) {
-                auto where = map->mapSeek(offset, SEEK_SET);
-                if(where!=(signed)offset) {
-                    sysErrFatal(
-                        "failed to seek into block chain file %s",
-                        map->mName.c_str()
+        void lazyInit() const
+        {
+            auto where = map->mapSeek(offset, SEEK_SET);
+            if (where != (signed)offset) {
+                sysErrFatal(
+                    "failed to seek into block chain file %s",
+                    map->mName.c_str()
                     );
-                }
-                data = (uint8_t*)malloc(size);
+            }
+            data = (uint8_t*)malloc(size);
 
-                auto sz = map->mapRead(data, size);
-                if(sz!=(signed)size) {
-                    //fatal("can't map block");
-                }
+            auto sz = map->mapRead(data, size);
+            if (sz != (signed)size) {
+                //fatal("can't map block");
+            }
+        }
+
+        const uint8_t *getData() const {
+            if (likely(0 == data)) {
+                lazyInit();
             }
             return data;
         }

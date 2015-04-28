@@ -379,7 +379,7 @@ static void parseTX(
                 txoSize,
                 txoOffset
             );
-            txo->getData();
+            txo->lazyInit();
         }
 
         SKIP(uint32_t, lockTime, p);
