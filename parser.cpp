@@ -231,7 +231,6 @@ static void parseOutputs(
     }
 
     for(uint64_t outputIndex=0; outputIndex<nbOutputs; ++outputIndex) {
-        auto found = (fullContext && !skip && (stopAtIndex==outputIndex));
         auto outputStart = p;
         parseOutput<skip, fullContext>(
             p,
@@ -241,7 +240,7 @@ static void parseOutputs(
             downInputIndex,
             downInputScript,
             downInputScriptSize,
-            found
+            false
         );
         if(!skip && !fullContext && txo && stopAtIndex == INVALID_INDEX)
         {
@@ -249,9 +248,6 @@ static void parseOutputs(
             uint8_t* data = (uint8_t*)malloc(s);
             memcpy(data, outputStart, s);
             txo->mRawData.push_back(data);
-        }
-        if(found) {
-            break;
         }
     }
 
