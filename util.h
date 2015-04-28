@@ -261,41 +261,9 @@
     private: // dont copy
         TXChunk(const TXChunk&);
         TXChunk& operator=(const TXChunk&);
-        uint8_t *data;
-
     public:
-        int mUnspendOutputCount;
-        void init(
-            CacheableMap *_map,
-            size_t _size,
-            size_t _offset
-        ) {
-            auto where = _map->mapSeek(_offset, SEEK_SET);
-            if(where!=(signed)_offset) {
-                sysErrFatal(
-                    "failed to seek into block chain file %s",
-                    _map->mName.c_str()
-                );
-            }
-            data = (uint8_t*)malloc(_size);
-
-            auto sz = _map->mapRead(data, _size);
-            if(sz!=(signed)_size) {
-                //fatal("can't map block");
-            }
-        }
-
-        const uint8_t *getData() const {
-            return data;
-        }
-
-        void releaseData() {
-            free(data);
-            data = 0;
-        }
-        static TXChunk *alloc() {
-            return (TXChunk*)PagedAllocator<TXChunk>::alloc();
-        }
+        TXChunk() {}
+        std::vector<uint8_t*> mRawData;
     };
 
     struct Block {

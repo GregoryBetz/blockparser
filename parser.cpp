@@ -204,6 +204,8 @@ static void parseOutput(
     }
 }
 
+const uint64_t INVALID_INDEX = -1;
+
 template<
     bool skip,
     bool fullContext
@@ -211,7 +213,8 @@ template<
 static void parseOutputs(
     const uint8_t *&p,
     const uint8_t *txHash,
-    uint64_t      stopAtIndex = -1,
+    TXChunk       *txo,
+    uint64_t      stopAtIndex = INVALID_INDEX,
     const uint8_t *downTXHash = 0,
     uint64_t      downInputIndex = 0,
     const uint8_t *downInputScript = 0,
@@ -220,24 +223,37 @@ static void parseOutputs(
     if(!skip && !fullContext) {
         startOutputs(p);
     }
+    
+    LOAD_VARINT(nbOutputs, p);
+    if(!skip && !fullContext && txo)
+    {
+        txo->mRawData.reserve((unsigned int)nbOutputs);
+    }
 
-        LOAD_VARINT(nbOutputs, p);
-        for(uint64_t outputIndex=0; outputIndex<nbOutputs; ++outputIndex) {
-            auto found = (fullContext && !skip && (stopAtIndex==outputIndex));
-            parseOutput<skip, fullContext>(
-                p,
-                txHash,
-                outputIndex,
-                downTXHash,
-                downInputIndex,
-                downInputScript,
-                downInputScriptSize,
-                found
-            );
-            if(found) {
-                break;
-            }
+    for(uint64_t outputIndex=0; outputIndex<nbOutputs; ++outputIndex) {
+        auto found = (fullContext && !skip && (stopAtIndex==outputIndex));
+        auto outputStart = p;
+        parseOutput<skip, fullContext>(
+            p,
+            txHash,
+            outputIndex,
+            downTXHash,
+            downInputIndex,
+            downInputScript,
+            downInputScriptSize,
+            found
+        );
+        if(!skip && !fullContext && txo && stopAtIndex == INVALID_INDEX)
+        {
+            size_t s = p - outputStart;
+            uint8_t* data = (uint8_t*)malloc(s);
+            memcpy(data, outputStart, s);
+            txo->mRawData.push_back(data);
         }
+        if(found) {
+            break;
+        }
+    }
 
     if(!skip && !fullContext) {
         endOutputs(p);
@@ -278,24 +294,29 @@ static void parseInput(
 
         if(!skip && 0!=upTX) {
             auto inputScript = p;
-            upTX->mUnspendOutputCount--;
-            auto upTXOutputs = upTX->getData();
-                parseOutputs<false, true>(
-                    upTXOutputs,
+                const uint8_t * rawData = upTX->mRawData[upOutputIndex];
+                parseOutput<false, true>(
+                    rawData,
                     upTXHash,
                     upOutputIndex,
                     txHash,
                     inputIndex,
                     inputScript,
-                    inputScriptSize
+                    inputScriptSize,
+                    true
                 );
-            if(upTX->mUnspendOutputCount == 0)
-            {
-                upTX->releaseData();
-                gTXOMap.erase(upTXHash);
-                PagedAllocator<TXChunk>::free(upTX);
-                PagedAllocator<uint256_t>::free(upTXHashOrig);
-            }
+                if (upTX)
+                {
+                    free(upTX->mRawData[upOutputIndex]);
+                    upTX->mRawData[upOutputIndex] = 0;
+                    unsigned int unspendOutputCount = std::count(upTX->mRawData.begin(), upTX->mRawData.end(), (uint8_t*)0);
+                    if (unspendOutputCount == upTX->mRawData.size())
+                    {
+                        gTXOMap.erase(upTXHash);
+                        delete upTX;
+                        PagedAllocator<uint256_t>::free(upTXHashOrig);
+                    }
+                }
         }
 
         p += inputScriptSize;
@@ -362,27 +383,12 @@ static void parseTX(
         parseInputs<skip>(block, p, txHash);
 
         TXChunk *txo = 0;
-        size_t txoOffset = -1;
-        const uint8_t *outputsStart = p;
         if(gNeedTXHash && !skip) {
-            txo = TXChunk::alloc();
-            txoOffset = block->chunk->getOffset() + (p - block->chunk->getData());
-            const uint8_t *p2 = p;
-            LOAD_VARINT(outputCount, p2);
-            txo->mUnspendOutputCount = (int)outputCount;
+            txo = new TXChunk;
             gTXOMap[txHash] = txo;
         }
 
-        parseOutputs<skip, false>(p, txHash);
-
-        if(txo) {
-            size_t txoSize = p - outputsStart;
-            txo->init(
-                block->chunk->getMap(),
-                txoSize,
-                txoOffset
-            );
-        }
+        parseOutputs<skip, false>(p, txHash, txo);
 
         SKIP(uint32_t, lockTime, p);
 

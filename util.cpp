@@ -37,10 +37,6 @@ template<> uint8_t *PagedAllocator<Chunk>::pool = 0;
 template<> uint8_t *PagedAllocator<Chunk>::poolEnd = 0;
 template<> std::vector<uint8_t*> PagedAllocator<Chunk>::garbageCollection(0);
 
-template<> uint8_t *PagedAllocator<TXChunk>::pool = 0;
-template<> uint8_t *PagedAllocator<TXChunk>::poolEnd = 0;
-template<> std::vector<uint8_t*> PagedAllocator<TXChunk>::garbageCollection(0);
-
 double usecs() {
     struct timeval t;
     gettimeofday(&t, 0);
