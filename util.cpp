@@ -23,15 +23,19 @@ const uint8_t hexDigits[] = "0123456789abcdef";
 
 template<> uint8_t *PagedAllocator<Block>::pool = 0;
 template<> uint8_t *PagedAllocator<Block>::poolEnd = 0;
+template<> std::vector<uint8_t*> PagedAllocator<Block>::garbageCollection(0);
 
 template<> uint8_t *PagedAllocator<uint256_t>::pool = 0;
 template<> uint8_t *PagedAllocator<uint256_t>::poolEnd = 0;
+template<> std::vector<uint8_t*> PagedAllocator<uint256_t>::garbageCollection(0);
 
 template<> uint8_t *PagedAllocator<uint160_t>::pool = 0;
 template<> uint8_t *PagedAllocator<uint160_t>::poolEnd = 0;
+template<> std::vector<uint8_t*> PagedAllocator<uint160_t>::garbageCollection(0);
 
 template<> uint8_t *PagedAllocator<Chunk>::pool = 0;
 template<> uint8_t *PagedAllocator<Chunk>::poolEnd = 0;
+template<> std::vector<uint8_t*> PagedAllocator<Chunk>::garbageCollection(0);
 
 double usecs() {
     struct timeval t;

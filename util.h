@@ -81,19 +81,31 @@
     >
     struct PagedAllocator {
 
+        static std::vector<uint8_t*> garbageCollection;
         static uint8_t *pool;
         static uint8_t *poolEnd;
         enum { kPageByteSize = sizeof(T)*kPageSize };
 
         static uint8_t *alloc() {
-            if(unlikely(poolEnd<=pool)) {
-                pool = (uint8_t*)malloc(kPageByteSize);
-                poolEnd = pool + kPageByteSize;
+            uint8_t *result = NULL;
+            if(likely(garbageCollection.empty()))
+            {
+                if(unlikely(poolEnd<=pool)) {
+                    pool = (uint8_t*)malloc(kPageByteSize);
+                    poolEnd = pool + kPageByteSize;
+                }
+                result = pool;
+                pool += sizeof(T);
             }
-            uint8_t *result = pool;
-            pool += sizeof(T);
+            else
+            {
+                result = garbageCollection.back();
+                garbageCollection.pop_back();
+            }
             return result;
         }
+        static void free(const T* obj) { garbageCollection.push_back((uint8_t*)obj); }
+        static void free(const uint8_t* obj) { garbageCollection.push_back((uint8_t*)obj); }
     };
 
     static inline uint8_t *allocHash256() { return PagedAllocator<uint256_t>::alloc(); }

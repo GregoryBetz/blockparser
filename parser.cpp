@@ -295,6 +295,7 @@ static void parseInput(
             {
                 upTX->releaseData();
                 gTXOMap.erase(upTXHash);
+                PagedAllocator<Chunk>::free(upTX);
             }
         }
 
@@ -370,7 +371,7 @@ static void parseTX(
             txo->mCallCount = 0;
             const uint8_t *p2 = p;
             LOAD_VARINT(outputCount, p2);
-            txo->mOutputCount = outputCount;
+            txo->mOutputCount = (int)outputCount;
             gTXOMap[txHash] = txo;
         }
 
