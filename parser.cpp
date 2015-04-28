@@ -165,8 +165,7 @@ static void parseOutput(
     const uint8_t *downTXHash,
     uint64_t      downInputIndex,
     const uint8_t *downInputScript,
-    uint64_t      downInputScriptSize,
-    bool          found = false
+    uint64_t      downInputScriptSize
 ) {
     if(!skip && !fullContext) {
         startOutput(p);
@@ -178,7 +177,7 @@ static void parseOutput(
         auto outputScript = p;
         p += outputScriptSize;
 
-        if(!skip && fullContext && found) {
+        if(!skip && fullContext) {
             edge(
                 value,
                 txHash,
@@ -239,8 +238,7 @@ static void parseOutputs(
             downTXHash,
             downInputIndex,
             downInputScript,
-            downInputScriptSize,
-            false
+            downInputScriptSize
         );
         if(!skip && !fullContext && txo && stopAtIndex == INVALID_INDEX)
         {
@@ -298,8 +296,7 @@ static void parseInput(
                     txHash,
                     inputIndex,
                     inputScript,
-                    inputScriptSize,
-                    true
+                    inputScriptSize
                 );
                 if (upTX)
                 {
