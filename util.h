@@ -258,7 +258,9 @@
     };
     
     struct TXChunk {
-    private:
+    private: // dont copy
+        TXChunk(const TXChunk&);
+        TXChunk& operator=(const TXChunk&);
         uint8_t *data;
 
     public:
