@@ -130,9 +130,8 @@
             }
             else
             {
-                warning("unknows seek type: %d", _type);
+                warning("unknown seek type: %d", _type);
             }
-            //info("lseek _offset %d, mOffset %d, mSize %d", _offset, mOffset, mSize);
             if (mOffset <= mSize)
             {
                 return mOffset;
@@ -196,6 +195,8 @@
         mutable uint8_t *data;
 
     public:
+        int mOutputCount;
+        mutable int mCallCount;
         void init(
             CacheableMap *_map,
             size_t _size,

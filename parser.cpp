@@ -276,6 +276,11 @@ static void parseInput(
 
         if(!skip && 0!=upTX) {
             auto inputScript = p;
+            upTX->mCallCount++;
+            if (upTX->mCallCount > upTX->mOutputCount)
+            {
+                warning("mCallCount %d mOutputCount %d", upTX->mCallCount, upTX->mOutputCount);
+            }
             auto upTXOutputs = upTX->getData();
                 parseOutputs<false, true>(
                     upTXOutputs,
@@ -286,7 +291,11 @@ static void parseInput(
                     inputScript,
                     inputScriptSize
                 );
-            upTX->releaseData();
+            if (upTX->mCallCount == upTX->mOutputCount)
+            {
+                upTX->releaseData();
+                gTXOMap.erase(upTXHash);
+            }
         }
 
         p += inputScriptSize;
@@ -358,6 +367,10 @@ static void parseTX(
         if(gNeedTXHash && !skip) {
             txo = Chunk::alloc();
             txoOffset = block->chunk->getOffset() + (p - block->chunk->getData());
+            txo->mCallCount = 0;
+            const uint8_t *p2 = p;
+            LOAD_VARINT(outputCount, p2);
+            txo->mOutputCount = outputCount;
             gTXOMap[txHash] = txo;
         }
 
@@ -370,6 +383,7 @@ static void parseTX(
                 txoSize,
                 txoOffset
             );
+            txo->getData();
         }
 
         SKIP(uint32_t, lockTime, p);
@@ -752,6 +766,7 @@ static void initHashtables() {
     info("initializing hash tables");
 
     gTXOMap.setEmptyKey(empty);
+    gTXOMap.set_deleted_key(empty);
     gBlockMap.setEmptyKey(empty);
 
     gChainSize = 0;
