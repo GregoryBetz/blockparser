@@ -104,8 +104,8 @@
             }
             return result;
         }
-        static void free(const T* obj) { garbageCollection.push_back((uint8_t*)obj); }
-        static void free(const uint8_t* obj) { garbageCollection.push_back((uint8_t*)obj); }
+        static void free(T* obj) { garbageCollection.push_back((uint8_t*)obj); }
+        static void free(uint8_t* obj) { garbageCollection.push_back(obj); }
     };
 
     static inline uint8_t *allocHash256() { return PagedAllocator<uint256_t>::alloc(); }
@@ -208,7 +208,7 @@
 
     public:
         int mOutputCount;
-        mutable int mCallCount;
+        int mCallCount;
         void init(
             CacheableMap *_map,
             size_t _size,

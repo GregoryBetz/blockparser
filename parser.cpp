@@ -258,7 +258,7 @@ static void parseInput(
     }
 
         auto upTXHash = p;
-        const Chunk *upTX = 0;
+        Chunk *upTX = 0;
         if(gNeedTXHash && !skip) {
             auto isGenTX = (0==memcmp(gNullHash.v, upTXHash, sizeof(gNullHash)));
             if(likely(false==isGenTX)) {
