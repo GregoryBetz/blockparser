@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-typedef HashMap<Hash256, Chunk*, Hash256Hasher, Hash256Equal>::Map TXOMap;
+typedef HashMap<Hash256, TXChunk*, Hash256Hasher, Hash256Equal>::Map TXOMap;
 typedef HashMap<Hash256, Block*, Hash256Hasher, Hash256Equal>::Map BlockMap;
 
 static bool gNeedTXHash;
@@ -258,7 +258,7 @@ static void parseInput(
     }
 
         auto upTXHash = p;
-        Chunk *upTX = 0;
+        TXChunk *upTX = 0;
         if(gNeedTXHash && !skip) {
             auto isGenTX = (0==memcmp(gNullHash.v, upTXHash, sizeof(gNullHash)));
             if(likely(false==isGenTX)) {
@@ -291,7 +291,7 @@ static void parseInput(
             {
                 upTX->releaseData();
                 gTXOMap.erase(upTXHash);
-                PagedAllocator<Chunk>::free(upTX);
+                PagedAllocator<TXChunk>::free(upTX);
             }
         }
 
@@ -358,11 +358,11 @@ static void parseTX(
 
         parseInputs<skip>(block, p, txHash);
 
-        Chunk *txo = 0;
+        TXChunk *txo = 0;
         size_t txoOffset = -1;
         const uint8_t *outputsStart = p;
         if(gNeedTXHash && !skip) {
-            txo = Chunk::alloc();
+            txo = TXChunk::alloc();
             txoOffset = block->chunk->getOffset() + (p - block->chunk->getData());
             const uint8_t *p2 = p;
             LOAD_VARINT(outputCount, p2);
@@ -379,7 +379,6 @@ static void parseTX(
                 txoSize,
                 txoOffset
             );
-            txo->lazyInit();
         }
 
         SKIP(uint32_t, lockTime, p);
