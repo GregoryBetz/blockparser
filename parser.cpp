@@ -276,11 +276,7 @@ static void parseInput(
 
         if(!skip && 0!=upTX) {
             auto inputScript = p;
-            upTX->mCallCount++;
-            if (upTX->mCallCount > upTX->mOutputCount)
-            {
-                warning("mCallCount %d mOutputCount %d", upTX->mCallCount, upTX->mOutputCount);
-            }
+            upTX->mUnspendOutputCount--;
             auto upTXOutputs = upTX->getData();
                 parseOutputs<false, true>(
                     upTXOutputs,
@@ -291,7 +287,7 @@ static void parseInput(
                     inputScript,
                     inputScriptSize
                 );
-            if (upTX->mCallCount == upTX->mOutputCount)
+            if(upTX->mUnspendOutputCount == 0)
             {
                 upTX->releaseData();
                 gTXOMap.erase(upTXHash);
@@ -368,10 +364,9 @@ static void parseTX(
         if(gNeedTXHash && !skip) {
             txo = Chunk::alloc();
             txoOffset = block->chunk->getOffset() + (p - block->chunk->getData());
-            txo->mCallCount = 0;
             const uint8_t *p2 = p;
             LOAD_VARINT(outputCount, p2);
-            txo->mOutputCount = (int)outputCount;
+            txo->mUnspendOutputCount = (int)outputCount;
             gTXOMap[txHash] = txo;
         }
 

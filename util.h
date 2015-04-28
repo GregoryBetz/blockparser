@@ -207,8 +207,7 @@
         mutable uint8_t *data;
 
     public:
-        int mOutputCount;
-        int mCallCount;
+        int mUnspendOutputCount;
         void init(
             CacheableMap *_map,
             size_t _size,
