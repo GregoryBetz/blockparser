@@ -259,6 +259,7 @@ static void parseInput(
 
         auto upTXHash = p;
         TXChunk *upTX = 0;
+        Hash256 upTXHashOrig = 0;
         if(gNeedTXHash && !skip) {
             auto isGenTX = (0==memcmp(gNullHash.v, upTXHash, sizeof(gNullHash)));
             if(likely(false==isGenTX)) {
@@ -266,6 +267,7 @@ static void parseInput(
                 if(unlikely(gTXOMap.end()==i)) {
                     errFatal("failed to locate upstream transaction");
                 }
+                upTXHashOrig = i->first;
                 upTX = i->second;
             }
         }
@@ -292,6 +294,7 @@ static void parseInput(
                 upTX->releaseData();
                 gTXOMap.erase(upTXHash);
                 PagedAllocator<TXChunk>::free(upTX);
+                PagedAllocator<uint256_t>::free(upTXHashOrig);
             }
         }
 

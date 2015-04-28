@@ -105,7 +105,7 @@
             return result;
         }
         static void free(T* obj) { garbageCollection.push_back((uint8_t*)obj); }
-        static void free(uint8_t* obj) { garbageCollection.push_back(obj); }
+        static void free(const uint8_t* obj) { garbageCollection.push_back((uint8_t*)obj); }
     };
 
     static inline uint8_t *allocHash256() { return PagedAllocator<uint256_t>::alloc(); }
