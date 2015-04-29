@@ -836,7 +836,7 @@ void showScriptInfo(
 
     if(0<=r) {
         uint8_t btcAddr[64];
-        hash160ToAddr(btcAddr, pubKeyHash);
+        hash160ToAddr(btcAddr, pubKeyHash, r == 3 ? 5 : 0);
         printf(
             "%sscriptPaysToAddr = '%s'\n",
             indent,
