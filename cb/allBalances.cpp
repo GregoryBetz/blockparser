@@ -138,6 +138,7 @@ struct AllBalances:public Callback
         firstBlock = 0;
 
         addrMap.setEmptyKey(emptyKey);
+        addrMap.set_deleted_key(emptyKey);
         addrMap.resize(15 * 1000 * 1000);
         allAddrs.reserve(15 * 1000 * 1000);
 
@@ -244,6 +245,11 @@ struct AllBalances:public Callback
             output.inputIndex = inputIndex;
             output.outputIndex = outputIndex;
             addr->outputVec->push_back(output);
+        }
+        else if (addr->sum == 0)
+        {
+            addrMap.erase(addr->hash.v);
+            PagedAllocator<Addr>::free(addr);
         }
     }
 
