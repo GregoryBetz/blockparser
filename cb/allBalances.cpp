@@ -407,7 +407,6 @@ struct AllBalances:public Callback
         info("found %" PRIu64 " addresses in total", (uint64_t)allAddrs.size());
         info("shown:%" PRIu64 " addresses", (uint64_t)i);
         printf("\n");
-        exit(0);
     }
 
     virtual void start(
@@ -473,6 +472,7 @@ struct AllBalances:public Callback
 
         if(0<=cutoffBlock && cutoffBlock<=curBlock->height) {
             wrapup();
+            exit(0);
         }
     }
 
