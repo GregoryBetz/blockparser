@@ -121,6 +121,14 @@
                 }
                 mData = (uint8_t*)malloc(mSize);
 
+                if(mData == 0)
+                {
+                    sysErrFatal(
+                        "can't allocate memory for map %s",
+                       mName.c_str()
+                    );
+                }
+
                 auto sz = read(mFd, mData, mSize);
                 if (sz != (signed)mSize) {
                     sysErrFatal(
