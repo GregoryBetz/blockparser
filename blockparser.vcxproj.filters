@@ -111,6 +111,7 @@
     </ClCompile>
     <ClCompile Include="sha256port.cpp" />
     <ClCompile Include="rmd160port.cpp" />
+    <ClCompile Include="memory_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scrypt\scrypt.h">
@@ -231,5 +232,6 @@
     </ClInclude>
     <ClInclude Include="sha256port.h" />
     <ClInclude Include="rmd160port.h" />
+    <ClInclude Include="memory_manager.h" />
   </ItemGroup>
 </Project>

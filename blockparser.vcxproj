@@ -145,6 +145,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="memory_manager.cpp" />
     <ClCompile Include="opcodes.cpp" />
     <ClCompile Include="option.cpp" />
     <ClCompile Include="parser.cpp" />
@@ -178,6 +179,7 @@
     <ClInclude Include="h9\sph_skein.h" />
     <ClInclude Include="h9\sph_types.h" />
     <ClInclude Include="h9\uint256.h" />
+    <ClInclude Include="memory_manager.h" />
     <ClInclude Include="opcodes.h" />
     <ClInclude Include="openssl\asn1.h" />
     <ClInclude Include="openssl\bio.h" />

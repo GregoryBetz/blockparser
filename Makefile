@@ -285,6 +285,13 @@ all:parser
 	@${CPLUS} -MD ${INC} ${COPT}  -c crypto/base58.cpp -o .objs/base58.o
 	@mv .objs/base58.d .deps
 
+.objs/memory_manager.o : memory_manager.cpp
+	@echo c++ -- memory_manager.cpp
+	@mkdir -p .deps
+	@mkdir -p .objs
+	@${CPLUS} -MD ${INC} ${COPT}  -c memory_manager.cpp -o .objs/memory_manager.o
+	@mv .objs/memory_manager.d .deps
+
 .objs/util.o : util.cpp
 	@echo c++ -- util.cpp
 	@mkdir -p .deps
@@ -328,6 +335,7 @@ OBJS=                       \
     .objs/sha256.o          \
     .objs/sha256port.o      \
     .objs/base58.o          \
+    .objs/memory_manager.o  \
     .objs/util.o            \
 
 parser:${OBJS}

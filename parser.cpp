@@ -226,7 +226,7 @@ static void parseOutputs(
     LOAD_VARINT(nbOutputs, p);
     if(!skip && !fullContext && txo)
     {
-        txo->mRawData.reserve((unsigned int)nbOutputs);
+        txo->mRawData = allocPtrs((int)nbOutputs);
     }
 
     for(uint64_t outputIndex=0; outputIndex<nbOutputs; ++outputIndex) {
@@ -242,10 +242,10 @@ static void parseOutputs(
         );
         if(!skip && !fullContext && txo && stopAtIndex == INVALID_INDEX)
         {
-            size_t s = p - outputStart;
-            uint8_t* data = (uint8_t*)malloc(s);
+            int s = p - outputStart;
+            uint8_t* data = allocTX(s);
             memcpy(data, outputStart, s);
-            txo->mRawData.push_back(data);
+            txo->mRawData[outputIndex] = data;
         }
     }
 
@@ -286,34 +286,32 @@ static void parseInput(
         LOAD(uint32_t, upOutputIndex, p);
         LOAD_VARINT(inputScriptSize, p);
 
-        if(!skip && 0!=upTX) {
-            auto inputScript = p;
-                const uint8_t * rawData = upTX->mRawData[upOutputIndex];
-                parseOutput<false, true>(
-                    rawData,
-                    upTXHash,
-                    upOutputIndex,
-                    txHash,
-                    inputIndex,
-                    inputScript,
-                    inputScriptSize
-                );
-                if (upTX)
-                {
-                    free(upTX->mRawData[upOutputIndex]);
-                    upTX->mRawData[upOutputIndex] = 0;
-                    unsigned int unspendOutputCount = std::count(upTX->mRawData.begin(), upTX->mRawData.end(), (uint8_t*)0);
-                    if (unspendOutputCount == upTX->mRawData.size())
-                    {
-                        gTXOMap.erase(upTXHash);
-                        delete upTX;
-                        PagedAllocator<uint256_t>::free(upTXHashOrig);
-                    }
-                }
+    if(!skip && 0!=upTX) {
+        auto inputScript = p;
+        const uint8_t * rawData = upTX->mRawData[upOutputIndex];
+        parseOutput<false, true>(
+            rawData,
+            upTXHash,
+            upOutputIndex,
+            txHash,
+            inputIndex,
+            inputScript,
+            inputScriptSize
+        );
+        freeTX(upTX->mRawData[upOutputIndex]);
+        upTX->mRawData[upOutputIndex] = 0;
+        int unspendOutputCount = countNonNullPtrs(upTX->mRawData);
+        if(unspendOutputCount == 0)
+        {
+            gTXOMap.erase(upTXHash);
+            freePtrs(upTX->mRawData);
+            delete upTX;
+            PagedAllocator<uint256_t>::free(upTXHashOrig);
         }
+    }
 
-        p += inputScriptSize;
-        SKIP(uint32_t, sequence, p);
+    p += inputScriptSize;
+    SKIP(uint32_t, sequence, p);
 
     if(!skip) {
         endInput(p);

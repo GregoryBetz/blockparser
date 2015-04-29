@@ -1,13 +1,8 @@
 #ifndef __UTIL_H__
     #define __UTIL_H__
 
-    #include <string>
-    #include <vector>
     #include <algorithm>
-    #include <common.h>
     #include <errlog.h>
-    #include <rmd160port.h>
-    #include <sha256port.h>
 #ifdef WIN32
     #include <uint128_t.h>
     #include <io.h>
@@ -15,17 +10,13 @@
 #else
     #include <unistd.h>
 #endif // WIN32
+    #include <memory_manager.h>
 
-    typedef const uint8_t *Hash160;
-    typedef const uint8_t *TypedHash160;
-    typedef const uint8_t *Hash256;
-    struct uint160_t { uint8_t v[  kRIPEMD160ByteSize]; };
-    struct uint168_t { uint8_t v[1+kRIPEMD160ByteSize]; };
-    struct uint256_t { uint8_t v[     kSHA256ByteSize]; };
 #ifndef WIN32
     typedef signed int int128_t __attribute__((mode(TI)));
     typedef unsigned int uint128_t __attribute__((mode(TI)));
 #endif // WIN32
+
     struct Hash160Hasher { uint64_t operator()( const Hash160 &hash160) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash160); const uint64_t *p = reinterpret_cast<const uint64_t*>(i); return p[0]; } };
     struct TypedHash160Hasher { uint64_t operator()(const TypedHash160 &hash160) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash160); const uint64_t *p = reinterpret_cast<const uint64_t*>(i); return p[0]; } };
     struct Hash256Hasher { uint64_t operator()( const Hash256 &hash256) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash256); const uint64_t *p = reinterpret_cast<const uint64_t*>(i); return p[0]; } };
@@ -74,42 +65,6 @@
             return true;
         }
     };
-
-    template<
-        typename T,
-        size_t   kPageSize = 16384
-    >
-    struct PagedAllocator {
-
-        static std::vector<uint8_t*> garbageCollection;
-        static uint8_t *pool;
-        static uint8_t *poolEnd;
-        enum { kPageByteSize = sizeof(T)*kPageSize };
-
-        static uint8_t *alloc() {
-            uint8_t *result = NULL;
-            if(likely(garbageCollection.empty()))
-            {
-                if(unlikely(poolEnd<=pool)) {
-                    pool = (uint8_t*)malloc(kPageByteSize);
-                    poolEnd = pool + kPageByteSize;
-                }
-                result = pool;
-                pool += sizeof(T);
-            }
-            else
-            {
-                result = garbageCollection.back();
-                garbageCollection.pop_back();
-            }
-            return result;
-        }
-        static void free(T* obj) { garbageCollection.push_back((uint8_t*)obj); }
-        static void free(const uint8_t* obj) { garbageCollection.push_back((uint8_t*)obj); }
-    };
-
-    static inline uint8_t *allocHash256() { return PagedAllocator<uint256_t>::alloc(); }
-    static inline uint8_t *allocHash160() { return PagedAllocator<uint160_t>::alloc(); }
 
     struct CacheableMap {
         CacheableMap(){}
@@ -262,7 +217,7 @@
         TXChunk& operator=(const TXChunk&);
     public:
         TXChunk() {}
-        std::vector<uint8_t*> mRawData;
+        uint8_t** mRawData;
     };
 
     struct Block {
