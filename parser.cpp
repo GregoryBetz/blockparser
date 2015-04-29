@@ -203,8 +203,6 @@ static void parseOutput(
     }
 }
 
-const uint64_t INVALID_INDEX = -1;
-
 template<
     bool skip,
     bool fullContext
@@ -212,12 +210,7 @@ template<
 static void parseOutputs(
     const uint8_t *&p,
     const uint8_t *txHash,
-    TXChunk       *txo,
-    uint64_t      stopAtIndex = INVALID_INDEX,
-    const uint8_t *downTXHash = 0,
-    uint64_t      downInputIndex = 0,
-    const uint8_t *downInputScript = 0,
-    uint64_t      downInputScriptSize = 0
+    TXChunk       *txo
 ) {
     if(!skip && !fullContext) {
         startOutputs(p);
@@ -235,12 +228,12 @@ static void parseOutputs(
             p,
             txHash,
             outputIndex,
-            downTXHash,
-            downInputIndex,
-            downInputScript,
-            downInputScriptSize
+            0,
+            0,
+            0,
+            0
         );
-        if(!skip && !fullContext && txo && stopAtIndex == INVALID_INDEX)
+        if(!skip && !fullContext && txo)
         {
             int s = p - outputStart;
             uint8_t* data = allocTX(s);
@@ -401,7 +394,6 @@ static void parseBlock(
     startBlock(block);
         auto p = block->chunk->getData();
 
-            auto header = p;
             SKIP(uint32_t, version, p);
             SKIP(uint256_t, prevBlkHash, p);
             SKIP(uint256_t, blkMerkleRoot, p);
