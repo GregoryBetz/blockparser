@@ -305,7 +305,7 @@ static void parseInput(
         {
             gTXOMap.erase(upTXHash);
             freePtrs(upTX->mRawData);
-            delete upTX;
+            PagedAllocator<TXChunk>::free(upTX);
             PagedAllocator<uint256_t>::free(upTXHashOrig);
         }
     }
@@ -375,7 +375,7 @@ static void parseTX(
 
         TXChunk *txo = 0;
         if(gNeedTXHash && !skip) {
-            txo = new TXChunk;
+            txo = TXChunk::alloc();
             gTXOMap[txHash] = txo;
         }
 

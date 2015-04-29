@@ -218,6 +218,10 @@
     public:
         TXChunk() {}
         uint8_t** mRawData;
+        
+        static TXChunk *alloc() {
+            return (TXChunk*)PagedAllocator<TXChunk>::alloc();
+        }
     };
 
     struct Block {
