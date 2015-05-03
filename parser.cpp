@@ -428,17 +428,44 @@ static void parseLongestChain() {
     info("pass 4 -- full blockchain analysis ...");
 
     gCallback->startLC();
+    auto startTime = usecs();
+    uint64_t currentOffset = 0;
 
-        auto blk = gNullBlock->next;
-        start(blk, gMaxBlock);
-        while(likely(0!=blk)) {
-            parseBlock(blk);
-            blk = blk->next;
+    auto blk = gNullBlock->next;
+    start(blk, gMaxBlock);
+    while (likely(0 != blk)) {
+        parseBlock(blk);
+
+        currentOffset += blk->chunk->getSize();
+        auto now = usecs();
+        static double lastStatTime = now + 1000 * 1000;
+        auto elapsed = now - lastStatTime;
+        bool longEnough = (1000 * 1000<elapsed);
+
+        if (unlikely(longEnough))
+        {
+            lastStatTime = now;
+            double elasedSinceStart = now - startTime;
+            double bytePerSec = (double)currentOffset / (elasedSinceStart*1e-6);
+            uint64_t dataLeft = gChainSize - currentOffset;
+            double secsLeft = (double)dataLeft / bytePerSec;
+            fprintf(
+                stderr,
+                "%d block parsed -- ETA %.0f secs -- ELAPSED %.0f secs\r",
+                (int)blk->height,
+                secsLeft,
+                elasedSinceStart*1e-6
+                );
+            fflush(stderr);
         }
+        blk = blk->next;
+    }
 
     gCallback->wrapup();
 
-    info("pass 4 -- done.");
+    auto now = usecs();
+    auto elapsed = now - startTime;
+    info("pass 4  -- took %.0f secs                                                           ", elapsed*1e-6);
 }
 
 static void wireLongestChain() {
@@ -916,6 +943,33 @@ int main(
 
     auto elapsed = (usecs() - start)*1e-6;
     info("all done in %.2f seconds\n", elapsed);
+#ifdef MEMORY_ANALYSIS
+    info("memory manager total memory consumption: %.2fM", ((double)PagedAllocatorTotalSize) / 1024.0 / 1024.0);
+    info("             - TXChunk consumption: %.2fM", ((double)PagedAllocator<TXChunk>::AllocatedMemory) / 1024.0 / 1024.0);
+    info("             - Chunk consumption: %.2fM", ((double)PagedAllocator<Chunk>::AllocatedMemory) / 1024.0 / 1024.0);
+    info("             - Block consumption: %.2fM", ((double)PagedAllocator<Block>::AllocatedMemory) / 1024.0 / 1024.0);
+    info("             - uint160_t consumption: %.2fM", ((double)PagedAllocator<uint160_t>::AllocatedMemory) / 1024.0 / 1024.0);
+    info("             - uint256_t consumption: %.2fM", ((double)PagedAllocator<uint256_t>::AllocatedMemory) / 1024.0 / 1024.0);
+#define PopularLength(x,y) info("             - uint%d consumption: %.2fM", x, ((double)PagedAllocator<uint##x, y>::AllocatedMemory) / 1024.0 / 1024.0);
+    POPULAR_LENGTH_LIST
+#undef PopularLength
+#define PopularOutput(x,y) info("             - ptrs%d consumption: %.2fM", x, ((double)PagedAllocator<ptrs##x, y>::AllocatedMemory) / 1024.0 / 1024.0);
+        POPULAR_OUTPUT_LIST
+#undef PopularOutput
+
+    info("unique TX rawdata total memory consumption is less then: %.2fM", ((double)UniqueTXTotalSize) / 1024.0 / 1024.0);
+    info("TXs total number: %d", UniqueTXTotalNumber);
+    info("unique PTRs total memory consumption: %.2fM", ((double)UniquePtrsTotalSize) / 1024.0 / 1024.0);
+    info("PTRs total number: %d", UniquePtrsTotalNumber);
+    info("gTXOMap size: %d", gTXOMap.size());;
+
+    for (int i = 0; i < 100; ++i)
+    {
+        fprintf(stderr, "i=%d  \r", 100 - i);
+        auto now = usecs();
+        while (usecs()<now + 1000000);
+    }
+#endif // MEMORY_ANALYSIS
     return 0;
 }
 
