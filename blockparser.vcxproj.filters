@@ -16,6 +16,15 @@
     <Filter Include="crypto">
       <UniqueIdentifier>{a71978c0-6f75-4142-b936-2d6912b19c5c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="google">
+      <UniqueIdentifier>{913ed62b-2ead-4842-b258-02e73c3d0ee8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="google\sparsehash">
+      <UniqueIdentifier>{44d67f57-ced4-43ac-9d59-81289ff5597c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="google\sparsehash\internal">
+      <UniqueIdentifier>{3bc83952-ef33-490c-81f2-0152b8d60217}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cb\allBalances.cpp">
@@ -233,5 +242,43 @@
     <ClInclude Include="sha256port.h" />
     <ClInclude Include="rmd160port.h" />
     <ClInclude Include="memory_manager.h" />
+    <ClInclude Include="google\sparsehash\template_util.h">
+      <Filter>google\sparsehash</Filter>
+    </ClInclude>
+    <ClInclude Include="google\sparsehash\type_traits.h">
+      <Filter>google\sparsehash</Filter>
+    </ClInclude>
+    <ClInclude Include="google\sparsehash\internal\densehashtable.h">
+      <Filter>google\sparsehash\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="google\sparsehash\internal\hashtable-common.h">
+      <Filter>google\sparsehash\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="google\sparsehash\internal\libc_allocator_with_realloc.h">
+      <Filter>google\sparsehash\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="google\sparsehash\internal\sparseconfig.h">
+      <Filter>google\sparsehash\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="google\sparsehash\internal\sparsehashtable.h">
+      <Filter>google\sparsehash\internal</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="google\dense_hash_map">
+      <Filter>google</Filter>
+    </None>
+    <None Include="google\sparse_hash_map">
+      <Filter>google</Filter>
+    </None>
+    <None Include="google\sparsehash\dense_hash_map">
+      <Filter>google\sparsehash</Filter>
+    </None>
+    <None Include="google\sparsehash\sparse_hash_map">
+      <Filter>google\sparsehash</Filter>
+    </None>
+    <None Include="google\sparsehash\sparsetable">
+      <Filter>google\sparsehash</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -44,12 +44,12 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;BITCOIN;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SPARSE_HASH;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;BITCOIN;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;google</AdditionalIncludeDirectories>
       <AdditionalOptions>-D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -63,11 +63,11 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;BITCOIN;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SPARSE_HASH;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;BITCOIN;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>.</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;google</AdditionalIncludeDirectories>
       <AdditionalOptions>-D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Full</Optimization>
       <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
@@ -170,6 +170,13 @@
     <ClInclude Include="crypto\ripemd160.h" />
     <ClInclude Include="crypto\sha256.h" />
     <ClInclude Include="errlog.h" />
+    <ClInclude Include="google\sparsehash\internal\densehashtable.h" />
+    <ClInclude Include="google\sparsehash\internal\hashtable-common.h" />
+    <ClInclude Include="google\sparsehash\internal\libc_allocator_with_realloc.h" />
+    <ClInclude Include="google\sparsehash\internal\sparseconfig.h" />
+    <ClInclude Include="google\sparsehash\internal\sparsehashtable.h" />
+    <ClInclude Include="google\sparsehash\template_util.h" />
+    <ClInclude Include="google\sparsehash\type_traits.h" />
     <ClInclude Include="h9\h9.h" />
     <ClInclude Include="h9\sph_blake.h" />
     <ClInclude Include="h9\sph_bmw.h" />
@@ -210,6 +217,13 @@
     <ClInclude Include="uint128_t.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="time_port.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="google\dense_hash_map" />
+    <None Include="google\sparsehash\dense_hash_map" />
+    <None Include="google\sparsehash\sparsetable" />
+    <None Include="google\sparsehash\sparse_hash_map" />
+    <None Include="google\sparse_hash_map" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
