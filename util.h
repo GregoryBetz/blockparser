@@ -17,9 +17,9 @@
     typedef unsigned int uint128_t __attribute__((mode(TI)));
 #endif // WIN32
 
-    struct Hash160Hasher { uint64_t operator()( const Hash160 &hash160) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash160); const uint64_t *p = reinterpret_cast<const uint64_t*>(i); return p[0]; } };
-    struct TypedHash160Hasher { uint64_t operator()(const TypedHash160 &hash160) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash160); const uint64_t *p = reinterpret_cast<const uint64_t*>(i); return p[0]; } };
-    struct Hash256Hasher { uint64_t operator()( const Hash256 &hash256) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash256); const uint64_t *p = reinterpret_cast<const uint64_t*>(i); return p[0]; } };
+    struct Hash160Hasher { size_t operator()(const Hash160 &hash160) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash160); const size_t *p = reinterpret_cast<const size_t*>(i); return p[0]; } };
+    struct TypedHash160Hasher { size_t operator()(const TypedHash160 &hash160) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash160); const size_t *p = reinterpret_cast<const size_t*>(i); return p[0]; } };
+    struct Hash256Hasher { size_t operator()(const Hash256 &hash256) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash256); const size_t *p = reinterpret_cast<const size_t*>(i); return p[0]; } };
 
     struct Hash160Equal {
         bool operator()(
