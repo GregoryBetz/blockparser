@@ -48,7 +48,7 @@ int gettimeofday(struct timeval *curTimeP, struct timezone *)
 
 	_ftime(&localTime);
 
-	curTimeP->tv_sec = localTime.time + localTime.timezone;
+	curTimeP->tv_sec = long(localTime.time + localTime.timezone);
 	curTimeP->tv_usec = localTime.millitm * 1000;
 
 	return(0);
