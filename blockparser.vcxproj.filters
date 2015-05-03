@@ -109,8 +109,6 @@
     <ClCompile Include="opcodes.cpp" />
     <ClCompile Include="option.cpp" />
     <ClCompile Include="parser.cpp" />
-    <ClCompile Include="time_port.cpp" />
-    <ClCompile Include="uint128_t.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="crypto\base58.cpp">
       <Filter>crypto</Filter>
@@ -124,6 +122,12 @@
     <ClCompile Include="sha256port.cpp" />
     <ClCompile Include="rmd160port.cpp" />
     <ClCompile Include="memory_manager.cpp" />
+    <ClCompile Include="windows\uint128_t.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\time_port.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scrypt\scrypt.h">
@@ -180,8 +184,6 @@
     <ClInclude Include="errlog.h" />
     <ClInclude Include="opcodes.h" />
     <ClInclude Include="option.h" />
-    <ClInclude Include="time_port.h" />
-    <ClInclude Include="uint128_t.h" />
     <ClInclude Include="windows\openssl\asn1.h">
       <Filter>windows\openssl</Filter>
     </ClInclude>
@@ -265,6 +267,12 @@
     </ClInclude>
     <ClInclude Include="windows\google\sparsehash\internal\sparsehashtable.h">
       <Filter>windows\google\sparsehash\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\uint128_t.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\time_port.h">
+      <Filter>windows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

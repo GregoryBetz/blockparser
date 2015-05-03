@@ -158,8 +158,8 @@
     <ClCompile Include="scrypt\pbkdf2.cpp" />
     <ClCompile Include="scrypt\scrypt.cpp" />
     <ClCompile Include="sha256port.cpp" />
-    <ClCompile Include="time_port.cpp" />
-    <ClCompile Include="uint128_t.cpp" />
+    <ClCompile Include="windows\time_port.cpp" />
+    <ClCompile Include="windows\uint128_t.cpp" />
     <ClCompile Include="util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -214,9 +214,9 @@
     <ClInclude Include="scrypt\pbkdf2.h" />
     <ClInclude Include="scrypt\scrypt.h" />
     <ClInclude Include="sha256port.h" />
-    <ClInclude Include="uint128_t.h" />
+    <ClInclude Include="windows\uint128_t.h" />
     <ClInclude Include="util.h" />
-    <ClInclude Include="time_port.h" />
+    <ClInclude Include="windows\time_port.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="windows\google\dense_hash_map" />
