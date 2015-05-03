@@ -10,9 +10,6 @@
     <Filter Include="h9">
       <UniqueIdentifier>{025c8810-dcbb-4cfc-95fd-f6200f9f0bd5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="openssl">
-      <UniqueIdentifier>{9f6ce744-b1d0-4b39-86de-a979f31b1a59}</UniqueIdentifier>
-    </Filter>
     <Filter Include="crypto">
       <UniqueIdentifier>{a71978c0-6f75-4142-b936-2d6912b19c5c}</UniqueIdentifier>
     </Filter>
@@ -27,6 +24,9 @@
     </Filter>
     <Filter Include="windows\google\sparsehash\internal">
       <UniqueIdentifier>{83bef884-b816-4ba2-b679-b4e77540a942}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="windows\openssl">
+      <UniqueIdentifier>{9f6ce744-b1d0-4b39-86de-a979f31b1a59}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -182,53 +182,53 @@
     <ClInclude Include="option.h" />
     <ClInclude Include="time_port.h" />
     <ClInclude Include="uint128_t.h" />
-    <ClInclude Include="openssl\asn1.h">
-      <Filter>openssl</Filter>
+    <ClInclude Include="windows\openssl\asn1.h">
+      <Filter>windows\openssl</Filter>
     </ClInclude>
-    <ClInclude Include="openssl\bio.h">
-      <Filter>openssl</Filter>
+    <ClInclude Include="windows\openssl\bio.h">
+      <Filter>windows\openssl</Filter>
     </ClInclude>
-    <ClInclude Include="openssl\bn.h">
-      <Filter>openssl</Filter>
+    <ClInclude Include="windows\openssl\bn.h">
+      <Filter>windows\openssl</Filter>
     </ClInclude>
-    <ClInclude Include="openssl\crypto.h">
-      <Filter>openssl</Filter>
+    <ClInclude Include="windows\openssl\crypto.h">
+      <Filter>windows\openssl</Filter>
     </ClInclude>
-    <ClInclude Include="openssl\e_os2.h">
-      <Filter>openssl</Filter>
+    <ClInclude Include="windows\openssl\e_os2.h">
+      <Filter>windows\openssl</Filter>
     </ClInclude>
-    <ClInclude Include="openssl\ec.h">
-      <Filter>openssl</Filter>
+    <ClInclude Include="windows\openssl\ec.h">
+      <Filter>windows\openssl</Filter>
     </ClInclude>
-    <ClInclude Include="openssl\ecdsa.h">
-      <Filter>openssl</Filter>
+    <ClInclude Include="windows\openssl\ecdsa.h">
+      <Filter>windows\openssl</Filter>
     </ClInclude>
-    <ClInclude Include="openssl\obj_mac.h">
-      <Filter>openssl</Filter>
+    <ClInclude Include="windows\openssl\obj_mac.h">
+      <Filter>windows\openssl</Filter>
     </ClInclude>
-    <ClInclude Include="openssl\opensslconf.h">
-      <Filter>openssl</Filter>
+    <ClInclude Include="windows\openssl\opensslconf.h">
+      <Filter>windows\openssl</Filter>
     </ClInclude>
-    <ClInclude Include="openssl\opensslv.h">
-      <Filter>openssl</Filter>
+    <ClInclude Include="windows\openssl\opensslv.h">
+      <Filter>windows\openssl</Filter>
     </ClInclude>
-    <ClInclude Include="openssl\ossl_typ.h">
-      <Filter>openssl</Filter>
+    <ClInclude Include="windows\openssl\ossl_typ.h">
+      <Filter>windows\openssl</Filter>
     </ClInclude>
-    <ClInclude Include="openssl\ripemd.h">
-      <Filter>openssl</Filter>
+    <ClInclude Include="windows\openssl\ripemd.h">
+      <Filter>windows\openssl</Filter>
     </ClInclude>
-    <ClInclude Include="openssl\safestack.h">
-      <Filter>openssl</Filter>
+    <ClInclude Include="windows\openssl\safestack.h">
+      <Filter>windows\openssl</Filter>
     </ClInclude>
-    <ClInclude Include="openssl\sha.h">
-      <Filter>openssl</Filter>
+    <ClInclude Include="windows\openssl\sha.h">
+      <Filter>windows\openssl</Filter>
     </ClInclude>
-    <ClInclude Include="openssl\stack.h">
-      <Filter>openssl</Filter>
+    <ClInclude Include="windows\openssl\stack.h">
+      <Filter>windows\openssl</Filter>
     </ClInclude>
-    <ClInclude Include="openssl\symhacks.h">
-      <Filter>openssl</Filter>
+    <ClInclude Include="windows\openssl\symhacks.h">
+      <Filter>windows\openssl</Filter>
     </ClInclude>
     <ClInclude Include="crypto\base58.h">
       <Filter>crypto</Filter>
