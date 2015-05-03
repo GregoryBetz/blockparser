@@ -15,6 +15,8 @@
     struct uint168_t { uint8_t v[1+kRIPEMD160ByteSize]; };
     struct uint256_t { uint8_t v[     kSHA256ByteSize]; };
 
+    extern unsigned int PagedAllocatorTotalSize;
+
     template<
         typename T,
         size_t   kPageSize = 16384
@@ -24,6 +26,7 @@
         static std::vector<uint8_t*> garbageCollection;
         static uint8_t *pool;
         static uint8_t *poolEnd;
+        static unsigned int AllocatedMemory;
         enum { kPageByteSize = sizeof(T)*kPageSize };
 
         static uint8_t *alloc() {
@@ -32,6 +35,8 @@
             {
                 if(unlikely(poolEnd<=pool)) {
                     pool = (uint8_t*)malloc(kPageByteSize);
+                    PagedAllocatorTotalSize += kPageByteSize;
+                    AllocatedMemory += kPageByteSize;
                     memset(pool, 0, kPageByteSize);
                     poolEnd = pool + kPageByteSize;
                 }
@@ -111,8 +116,12 @@
     };
     #undef PopularLength
 
+    static unsigned int UniqueTXTotalSize = 0;
+    static unsigned int UniqueTXTotalNumber = 0;
+
     static inline uint8_t *allocTX(int _size)
     {
+        ++UniqueTXTotalNumber;
         for(int i = 0; i < LengthOther; ++i)
         {
             if(EnumToLength[i] == _size)
@@ -123,18 +132,21 @@
             }
         }
         uint8_t* result = (uint8_t*)malloc(_size + 1);
+        UniqueTXTotalSize += _size + 1;
         result[0] = LengthOther;
         return result + 1;
     }
     static inline void freeTX(uint8_t* tx)
     {
+        --UniqueTXTotalNumber;
         int lengthIndex = *(tx-1);
         if(lengthIndex >=0 && lengthIndex < LengthOther)
         {
             freeBytesFuncs[lengthIndex](tx-1);
             return;
         }
-        free(tx-1);
+        //UniqueTXTotalSize -= lengthIndex;
+        free(tx - 1);
     }
 
     #define POPULAR_OUTPUT_LIST \
@@ -186,8 +198,12 @@
     };
     #undef PopularOutput
 
+    static unsigned int UniquePtrsTotalSize = 0;
+    static unsigned int UniquePtrsTotalNumber = 0;
+
     static inline uint8_t** allocPtrs(int _size)
     {
+        ++UniquePtrsTotalNumber;
         if(_size <= OutputNumberCount)
         {
             // zero based: allocPtrsFuncs[0] is the allocator for 1
@@ -196,17 +212,20 @@
             return result + 1;
         }
         uint8_t** result = (uint8_t**)malloc(sizeof(uint8_t*) * (_size + 1));
+        UniquePtrsTotalSize += (_size + 1) * sizeof(uint8_t*);
         result[0] = reinterpret_cast<uint8_t*>(_size);
         return result + 1;
     }
     static inline void freePtrs(uint8_t** ptrs)
     {
+        --UniquePtrsTotalNumber;
         int length = reinterpret_cast<intptr_t>(*(ptrs - 1));
         if(length >=0 && length <= OutputNumberCount)
         {
             freePtrsFuncs[length-1](ptrs-1);
             return;
         }
+        UniquePtrsTotalSize += (length+1)* sizeof(uint8_t*);
         free(ptrs-1);
     }
 

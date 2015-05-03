@@ -23,14 +23,17 @@ const uint8_t hexDigits[] = "0123456789abcdef";
 
 template<> uint8_t *PagedAllocator<Block>::pool = 0;
 template<> uint8_t *PagedAllocator<Block>::poolEnd = 0;
+template<> unsigned int PagedAllocator<Block>::AllocatedMemory = 0;
 template<> std::vector<uint8_t*> PagedAllocator<Block>::garbageCollection(0);
 
 template<> uint8_t *PagedAllocator<Chunk>::pool = 0;
 template<> uint8_t *PagedAllocator<Chunk>::poolEnd = 0;
+template<> unsigned int PagedAllocator<Chunk>::AllocatedMemory = 0;
 template<> std::vector<uint8_t*> PagedAllocator<Chunk>::garbageCollection(0);
 
 template<> uint8_t *PagedAllocator<TXChunk>::pool = 0;
 template<> uint8_t *PagedAllocator<TXChunk>::poolEnd = 0;
+template<> unsigned int PagedAllocator<TXChunk>::AllocatedMemory = 0;
 template<> std::vector<uint8_t*> PagedAllocator<TXChunk>::garbageCollection(0);
 
 double usecs() {
