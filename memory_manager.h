@@ -86,7 +86,7 @@
     POPULAR_LENGTH_LIST
     #undef PopularLength
 
-    #define PopularLength(x,y) static inline uint8_t *allocNBytes##x() { return PagedAllocator<uint##x, sizeof(uint##x)*y>::alloc(); }
+    #define PopularLength(x,y) static inline uint8_t *allocNBytes##x() { return PagedAllocator<uint##x, y>::alloc(); }
     POPULAR_LENGTH_LIST
     #undef PopularLength
 
@@ -99,7 +99,7 @@
     };
     #undef PopularLength
 
-    #define PopularLength(x,y) static inline void freeNBytes##x(const uint8_t* obj) { return PagedAllocator<uint##x, sizeof(uint##x)*y>::free(obj); }
+    #define PopularLength(x,y) static inline void freeNBytes##x(const uint8_t* obj) { return PagedAllocator<uint##x, y>::free(obj); }
     POPULAR_LENGTH_LIST
     #undef PopularLength
 
@@ -162,7 +162,7 @@
     POPULAR_OUTPUT_LIST
     #undef PopularOutput
 
-    #define PopularOutput(x,y) static inline uint8_t** allocNPtrs##x() { return (uint8_t**)PagedAllocator<ptrs##x, sizeof(ptrs##x)*y>::alloc(); }
+    #define PopularOutput(x,y) static inline uint8_t** allocNPtrs##x() { return (uint8_t**)PagedAllocator<ptrs##x, y>::alloc(); }
     POPULAR_OUTPUT_LIST
     #undef PopularOutput
 
@@ -174,7 +174,7 @@
     };
     #undef PopularOutput
 
-    #define PopularOutput(x,y) static inline void freeNPtrs##x(uint8_t** obj) { return PagedAllocator<ptrs##x, sizeof(ptrs##x)*y>::free((ptrs##x *)obj); }
+    #define PopularOutput(x,y) static inline void freeNPtrs##x(uint8_t** obj) { return PagedAllocator<ptrs##x, y>::free((ptrs##x *)obj); }
     POPULAR_OUTPUT_LIST
     #undef PopularOutput
 
