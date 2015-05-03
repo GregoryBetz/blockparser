@@ -21,6 +21,7 @@ static std::vector<CacheableMap*> mapVec;
 static TXOMap gTXOMap;
 static BlockMap gBlockMap;
 static uint8_t empty[kSHA256ByteSize] = { 0x42 };
+static uint8_t deleted[kSHA256ByteSize] = { 0x43 };
 
 static Block *gMaxBlock;
 static Block *gNullBlock;
@@ -753,7 +754,7 @@ static void initHashtables() {
     info("initializing hash tables");
 
     gTXOMap.setEmptyKey(empty);
-    gTXOMap.set_deleted_key(empty);
+    gTXOMap.set_deleted_key(deleted);
     gBlockMap.setEmptyKey(empty);
 
     gChainSize = 0;

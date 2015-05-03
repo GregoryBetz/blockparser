@@ -14,6 +14,7 @@
 
 struct Addr;
 static uint8_t emptyKey[kSHA256ByteSize] = { 0x52 };
+static uint8_t deletedKey[kSHA256ByteSize] = { 0x53 };
 typedef HashMap<TypedHash160, Addr*, TypedHash160Hasher, TypedHash160Equal>::Map AddrMap;
 typedef HashMap<Hash160, int, Hash160Hasher, Hash160Equal>::Map RestrictMap;
 
@@ -138,7 +139,7 @@ struct AllBalances:public Callback
         firstBlock = 0;
 
         addrMap.setEmptyKey(emptyKey);
-        addrMap.set_deleted_key(emptyKey);
+        addrMap.set_deleted_key(deletedKey);
         addrMap.resize(15 * 1000 * 1000);
         allAddrs.reserve(15 * 1000 * 1000);
 
