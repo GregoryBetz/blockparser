@@ -8,7 +8,7 @@ INC =                           \
         -I.                     \
         -DNDEBUG                \
         -DBITCOIN               \
-        -DWANT_DENSE            \
+        -DSPARSE_HASH           \
 
 #-DCLAM                  \
 #-DBITCOIN               \
