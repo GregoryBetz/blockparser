@@ -56,6 +56,14 @@ struct CompareAddr
     }
 };
 
+template< typename tPair >
+struct second_t {
+    typename tPair::second_type operator()(const tPair& p) const { return p.second; }
+};
+
+template< typename tMap >
+second_t< typename tMap::value_type > second(const tMap& m) { return second_t<typename tMap::value_type >(); }
+
 struct AllBalances:public Callback
 {
     bool csv;
@@ -142,7 +150,6 @@ struct AllBalances:public Callback
         addrMap.setEmptyKey(emptyKey);
         addrMap.set_deleted_key(deletedKey);
         addrMap.resize(15 * 1000 * 1000);
-        allAddrs.reserve(15 * 1000 * 1000);
 
         optparse::Values &values = parser.parse_args(argc, argv);
         cutoffBlock = (int)values.get("atBlock");
@@ -226,7 +233,6 @@ struct AllBalances:public Callback
             }
 
             addrMap[addr->hash.v] = addr;
-            allAddrs.push_back(addr);
         }
 
         if(0<value) {
@@ -310,6 +316,9 @@ struct AllBalances:public Callback
     }
 
     virtual void wrapup() {
+
+        allAddrs.clear();
+        std::transform(addrMap.begin(), addrMap.end(), std::back_inserter(allAddrs), second(addrMap));
 
         CompareAddr compare;
         auto e = allAddrs.end();
