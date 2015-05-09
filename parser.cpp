@@ -205,27 +205,26 @@ static void parseOutput(
 }
 
 template<
-    bool skip,
-    bool fullContext
+    bool skip
 >
 static void parseOutputs(
     const uint8_t *&p,
     const uint8_t *txHash,
     TXChunk       *txo
 ) {
-    if(!skip && !fullContext) {
+    if(!skip) {
         startOutputs(p);
     }
     
     LOAD_VARINT(nbOutputs, p);
-    if(!skip && !fullContext && txo)
+    if(!skip && txo)
     {
         txo->mRawData = allocPtrs((int)nbOutputs);
     }
 
     for(uint64_t outputIndex=0; outputIndex<nbOutputs; ++outputIndex) {
         auto outputStart = p;
-        parseOutput<skip, fullContext>(
+        parseOutput<skip, false>(
             p,
             txHash,
             outputIndex,
@@ -234,7 +233,7 @@ static void parseOutputs(
             0,
             0
         );
-        if(!skip && !fullContext && txo)
+        if(!skip && txo)
         {
             int s = p - outputStart;
             uint8_t* data = allocTX(s);
@@ -243,7 +242,7 @@ static void parseOutputs(
         }
     }
 
-    if(!skip && !fullContext) {
+    if(!skip) {
         endOutputs(p);
     }
 }
@@ -373,7 +372,7 @@ static void parseTX(
             gTXOMap[txHash] = txo;
         }
 
-        parseOutputs<skip, false>(p, txHash, txo);
+        parseOutputs<skip>(p, txHash, txo);
 
         SKIP(uint32_t, lockTime, p);
 
