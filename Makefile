@@ -9,9 +9,9 @@ INC =                           \
         -DNDEBUG                \
         -DBITCOIN               \
         -DSPARSE_HASH           \
+        -D__HAS_BOOST__         \
 
 #-DCLAM                  \
-#-DBITCOIN               \
 #-DDARKCOIN              \
 #-DJUMBUCKS              \
 #-DLITECOIN              \
