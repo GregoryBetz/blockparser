@@ -629,7 +629,7 @@ static void computeBlockHeights() {
 }
 
 static void getBlockHeader(
-    size_t         &size,
+    unsigned int   &size,
     Block         *&prev,
           uint8_t *&hash,
     size_t         &earlyMissCnt,
@@ -702,7 +702,7 @@ static void buildBlockHeaders() {
 
             uint8_t *hash = 0;
             Block *prevBlock = 0;
-            size_t blockSize = 0;
+            unsigned int blockSize = 0;
 
             getBlockHeader(blockSize, prevBlock, hash, earlyMissCnt, buf);
             if(unlikely(0==hash)) {

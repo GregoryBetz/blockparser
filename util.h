@@ -69,7 +69,7 @@
     struct CacheableMap {
         CacheableMap(){}
         int mFd;
-        size_t mSize;
+        unsigned int mSize;
         std::string mName;
         static CacheableMap* OneLoadedMap;
         size_t mOffset = 0;
@@ -165,14 +165,14 @@
     struct Chunk {
     private:
         CacheableMap *map;
-        size_t size;
+        unsigned int size;
         size_t offset;
         mutable uint8_t *data;
 
     public:
         void init(
             CacheableMap *_map,
-            size_t _size,
+            unsigned int _size,
             size_t _offset
         ) {
             data = 0;
@@ -210,7 +210,7 @@
             data = 0;
         }
 
-        size_t getSize() const    { return size;   }
+        unsigned int getSize() const    { return size; }
         size_t getOffset() const  { return offset; }
         CacheableMap *getMap()    { return map; }
 
@@ -243,7 +243,7 @@
         void init(
             const uint8_t *_hash,
             CacheableMap *_map,
-            size_t         _size,
+            unsigned int  _size,
             Block         *_prev,
             uint64_t       _offset      
         ) {
