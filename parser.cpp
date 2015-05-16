@@ -459,7 +459,7 @@ static void parseLongestChain() {
         }
         blk = blk->next;
     }
-
+    fprintf(stderr, "                                                                                       \r");
     gCallback->wrapup();
 
     auto now = usecs();
