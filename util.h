@@ -85,7 +85,7 @@
             return length;
         }
 
-        int mapSeek(size_t _offset, int _type)
+        size_t mapSeek(size_t _offset, int _type)
         {
             if (_type == SEEK_SET)
             {
@@ -103,7 +103,7 @@
             {
                 return mOffset;
             }
-            return -1;
+            return std::numeric_limits<std::size_t>::max();
         }
 
         const uint8_t *getData(size_t _offset) {
@@ -184,7 +184,7 @@
         void lazyInit() const
         {
             auto where = map->mapSeek(offset, SEEK_SET);
-            if (where != (signed)offset) {
+            if (where != offset) {
                 sysErrFatal(
                     "failed to seek into block chain file %s",
                     map->mName.c_str()

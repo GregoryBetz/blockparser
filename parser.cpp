@@ -528,7 +528,7 @@ static void findBlockParent(
         b->chunk->getOffset(),
         SEEK_SET
     );
-    if(where!=(signed)b->chunk->getOffset()) {
+    if(where!=b->chunk->getOffset()) {
         sysErrFatal(
             "failed to seek into block chain file %s",
             b->chunk->getMap()->mName.c_str()
@@ -711,7 +711,7 @@ static void buildBlockHeaders() {
 
             auto where = map->mapSeek((blockSize + 8) - sz, SEEK_CUR);
             auto blockOffset = where - blockSize;
-            if(where<0) {
+            if (where == std::numeric_limits<std::size_t>::max()) {
                 break;
             }
 
