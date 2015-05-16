@@ -235,7 +235,7 @@ static void parseOutputs(
         );
         if(!skip && txo)
         {
-            int s = p - outputStart;
+            int s = (int)(p - outputStart);
             uint8_t* data = allocTX(s);
             memcpy(data, outputStart, s);
             txo->mRawData[outputIndex] = data;
