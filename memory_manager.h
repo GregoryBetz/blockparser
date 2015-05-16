@@ -15,7 +15,7 @@
     struct uint168_t { uint8_t v[1+kRIPEMD160ByteSize]; };
     struct uint256_t { uint8_t v[     kSHA256ByteSize]; };
 
-    extern unsigned int PagedAllocatorTotalSize;
+    extern long long PagedAllocatorTotalSize;
 
     template<
         typename T,
@@ -26,7 +26,7 @@
         static std::vector<uint8_t*> garbageCollection;
         static uint8_t *pool;
         static uint8_t *poolEnd;
-        static unsigned int AllocatedMemory;
+        static long long AllocatedMemory;
         enum { kPageByteSize = sizeof(T)*kPageSize };
 
         static uint8_t *alloc() {
@@ -198,8 +198,8 @@
     };
     #undef PopularOutput
 
-    static unsigned int UniquePtrsTotalSize = 0;
-    static unsigned int UniquePtrsTotalNumber = 0;
+    static long long UniquePtrsTotalSize = 0;
+    static long long UniquePtrsTotalNumber = 0;
 
     static inline uint8_t** allocPtrs(int _size)
     {
@@ -219,7 +219,7 @@
     static inline void freePtrs(uint8_t** ptrs)
     {
         --UniquePtrsTotalNumber;
-        int length = reinterpret_cast<intptr_t>(*(ptrs - 1));
+        long long length = reinterpret_cast<intptr_t>(*(ptrs - 1));
         if(length >=0 && length <= OutputNumberCount)
         {
             freePtrsFuncs[length-1](ptrs-1);
@@ -231,7 +231,7 @@
 
     static inline int countNonNullPtrs(uint8_t** ptrs)
     {
-        int length = reinterpret_cast<intptr_t>(*(ptrs - 1));
+        long long length = reinterpret_cast<intptr_t>(*(ptrs - 1));
         int counter = 0;
         for(int i = 0; i < length; ++i)
         {

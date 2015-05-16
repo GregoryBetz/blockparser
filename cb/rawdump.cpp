@@ -78,7 +78,7 @@ struct RawDump:public Callback {
         push();
 
         printf(
-            "%ssize = %" PRIu64 "\n",
+            "%ssize = %d\n",
             spaces,
             b->chunk->getSize()
         );

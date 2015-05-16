@@ -41,7 +41,7 @@ struct Addr
 
 template<> uint8_t *PagedAllocator<Addr>::pool = 0;
 template<> uint8_t *PagedAllocator<Addr>::poolEnd = 0;
-template<> unsigned int PagedAllocator<Addr>::AllocatedMemory = 0;
+template<> long long PagedAllocator<Addr>::AllocatedMemory = 0;
 template<> std::vector<uint8_t*> PagedAllocator<Addr>::garbageCollection(0);
 static inline Addr *allocAddr() { return (Addr*)PagedAllocator<Addr>::alloc(); }
 
