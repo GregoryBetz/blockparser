@@ -1,28 +1,17 @@
 blockparser
 ===========
 
+        A fairly fast, quick and dirty bitcoin whole blockchain parser.
+
     Credits:
     --------
 
         Written by znort987@yahoo.com
         If you find this useful: 1ZnortsoStC1zSTXbW6CUtkvqew8czMMG
+        Ported to Windows by zgalli@email.com
 
-    What:
-    -----
-
-        A fairly fast, quick and dirty bitcoin whole blockchain parser.
-
-    Why:
-    ----
-
-        . Few dependencies: openssl-dev, boost
-
-        . Very quickly extract information from the entire blockchain.
-
-        . Code is simple and helps to understand how the data structure underlying bitcoin works.
-
-    Build it:
-    ---------
+    Build it on Linux:
+    ------------------
 
         . Turn your x86-64 Ubuntu box on
 
@@ -41,22 +30,34 @@ blockparser
              http://askubuntu.com/questions/178712/how-to-increase-swap-space
              Tested on ( Ubuntu 12.04, 250 ssd, 16gb ram, 9GB Swap )
 
-    Try it:
-    -------
+    Build it on Windows:
+    --------------------
 
-        . Compute simple blockchain stats, full chain parse (< 1 second)
+        . Open blockparser.sln with Microsoft Visual Studio.
+
+        . Set environment variable BLOCKCHAIN_DIR to your satoshi client blockchain folder.
+            E.g. if your blockchain folder is e:\Coindata\Bitcoin\ then:
+            go to Properties->Debugging->Environment and type: BLOCKCHAIN_DIR=E:\Coindata\Bitcoin
+
+        . Compile.
+
+    Try it on Linux:
+    ----------------
+
+        . Compute simple blockchain stats, full chain parse (15 minutes with 34 GB blockchain in May 2015):
 
             ./parser simpleStats
 
-        . Extract all transactions for popular address 1dice6wBxymYi3t94heUAG6MpG5eceLG1 (20 seconds)
+        . Extract all transactions for popular address 1dice6wBxymYi3t94heUAG6MpG5eceLG1 (28 minutes):
 
             ./parser transactions 06f1b66fa14429389cbffa656966993eab656f37
 
-        . Compute the closure of an address, that is the list of addresses that provably belong to the same person (20 seconds):
+        . Compute the closure of an address, that is the list of addresses that provably belong to the same person.
+            (This function is turned off in Windows because of excessive RAM usage):
 
             ./parser closure 06f1b66fa14429389cbffa656966993eab656f37
 
-        . Compute and print the balance for all keys ever used in a TX since the beginning of time (30 seconds):
+        . Compute and print the balance for all keys ever used in a TX since the beginning of time (33 minutes):
 
             ./parser allBalances >allBalances.txt
 
@@ -72,15 +73,22 @@ blockparser
 
             ./parser show
 
+    Try it on Windows:
+    ------------------
+
+        Open a command line. Set environment variable BLOCKCHAIN_DIR to your satoshi client blockchain folder.
+        E.g. if your blockchain folder is e:\Coindata\Bitcoin\ type:
+		set BLOCKCHAIN_DIR=e:\Coindata\Bitcoin\
+        Run blockparser.exe with the same arguments as above, e.g.:
+		blockparser.exe simpleStats
+
     Caveats:
     --------
 
-        . You need an x86-84 ubuntu box and a recent version of GCC(>=4.4), recent versions of boost
-          and openssl-dev. The whole thing is very unlikely to work or even compile on anything else.
-
-        . It needs quite a bit of RAM to work. Never exactly measured how much, but the hash maps will
-          grow quite fat. I might switch them to something different that spills over to disk at some
-          point. For now: it works fine with 8 Gigs.
+        . According to choosen argument it needs quite a bit of RAM to work. As of May 2015 with a 34 GB blockchain:
+                simpleStats uses 300 MB.
+                allBalances uses 2.5 GB.
+                closure uses too much memory, 8 GB in my machine is not enough, so I switched it off in Windows build.
 
         . The code isn't particularly clean or well architected. It was just a quick way for me to learn
           about bitcoin. There isnt much in the way of comments either.
@@ -133,6 +141,15 @@ blockparser
         . The code makes heavy use of the google dense hash maps. You can switch it to use sparse hash
           maps (see Makefile, search for: DENSE, undef it). Sparse hash maps are slower but save quite a
           bit of RAM.
+
+        . Windows version works well only with sparse hash.
+
+    Thanks:
+    -------
+        Thanks to the Bitcoin Core developers for base58, ripemd160 and sha256 implementation
+        Thanks to Jason Lee for uint128_t
+        Thanks to johnnyw for gettimeofday.c
+        Thanks to stathis for precompiled openssl library
 
     License:
     --------
