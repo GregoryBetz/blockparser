@@ -29,7 +29,7 @@ static int64_t gMaxHeight;
 static uint64_t gChainSize;
 static uint256_t gNullHash;
 
-static const size_t gHeightLimit = 1200000;
+static const size_t gHeightLimit = std::numeric_limits<std::size_t>::max();
 
 #if defined BITCOIN
     static const size_t gHeaderSize = 80;
