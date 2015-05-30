@@ -95,11 +95,11 @@ Try it on Windows
 * Open a command line. Set environment variable BLOCKCHAIN_DIR to your satoshi client blockchain folder.
   E.g. if your blockchain folder is e:\Coindata\Bitcoin\ type:
 ```
-    set BLOCKCHAIN_DIR=e:\Coindata\Bitcoin\
+set BLOCKCHAIN_DIR=e:\Coindata\Bitcoin\
 ```
 * Run blockparser.exe with the same arguments as above, e.g.:
 ```
-    blockparser.exe simpleStats
+blockparser.exe simpleStats
 ```
 
 Caveats
@@ -133,17 +133,16 @@ Hacking the code
         solveOutputScript
         decompressPublicKey
 
-* cb/allBalances.cpp    :   code to all balance of all addresses
-* cb/closure.cpp        :   code to compute the transitive closure of an address
-* cb/dumpTX.cpp         :   code to display a transaction in very great detail
-* cb/help.cpp           :   code to dump detailed help for all other commands
-* cb/pristine.cpp       :   code to show all "pristine" (i.e. unspent) blocks
-* cb/rewards.cpp        :   code to show all block rewards (including fees)
-* cb/simpleStats.cpp    :   code to compute simple stats.
-* cb/sql.cpp            :   code to product an SQL dump of the blockchain
-* cb/taint.cpp          :   code to compute the taint from a given TX to all TXs.
-* cb/transactions.cpp   :   code to extract all transactions pertaining to an address.
-
+* cb/allBalances.cpp -- code to all balance of all addresses
+* cb/closure.cpp -- code to compute the transitive closure of an address
+* cb/dumpTX.cpp -- code to display a transaction in very great detail
+* cb/help.cpp -- code to dump detailed help for all other commands
+* cb/pristine.cpp -- code to show all "pristine" (i.e. unspent) blocks
+* cb/rewards.cpp -- code to show all block rewards (including fees)
+* cb/simpleStats.cpp -- code to compute simple stats.
+* cb/sql.cpp -- code to product an SQL dump of the blockchain
+* cb/taint.cpp -- code to compute the taint from a given TX to all TXs
+* cb/transactions.cpp -- code to extract all transactions pertaining to an address
 
 * You can very easily add your own custom command. You can use the existing callbacks in
   directory ./cb/ as a template to build your own:
