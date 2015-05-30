@@ -57,9 +57,9 @@ blockparser
 
             ./parser closure 06f1b66fa14429389cbffa656966993eab656f37
 
-        . Compute and print the balance for all keys ever used in a TX since the beginning of time (33 minutes):
+        . Compute and print the balance for the top 1000 keys (33 minutes):
 
-            ./parser allBalances >allBalances.txt
+            ./parser allBalances -l 1000 -w 1000 > allBalances.txt
 
         . See how much of the BTC 10K pizza tainted each of the TX in the chain
 
