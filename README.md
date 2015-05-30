@@ -1,11 +1,9 @@
 blockparser
 ===========
-
 A fairly fast, quick and dirty bitcoin whole blockchain parser.
 
 Credits
 -------
-
 Written by znort987@yahoo.com
 
 If you find this useful: 1ZnortsoStC1zSTXbW6CUtkvqew8czMMG
@@ -15,11 +13,11 @@ Ported to Windows by zgalli@email.com
 Build it on Linux
 -----------------
 
-0.  Turn your x86-64 Ubuntu box on
+1.  Turn your x86-64 Ubuntu box on
 
-0.  Make sure you have an up to date satoshi client blockchain in ~/.bitcoin
+2.  Make sure you have an up to date satoshi client blockchain in ~/.bitcoin
 
-0.  Run this:
+3.  Run this:
 ```
 sudo apt-get install libssl-dev build-essential g++-4.4 libboost-all-dev libsparsehash-dev git-core perl
 git clone git://github.com/znort987/blockparser.git
@@ -34,64 +32,54 @@ Tested on ( Ubuntu 12.04, 250 ssd, 16gb ram, 9GB Swap )
 
 Build it on Windows
 -------------------
+1.  Open blockparser.sln with Microsoft Visual Studio.
 
-0.  Open blockparser.sln with Microsoft Visual Studio.
-
-0.  Set environment variable BLOCKCHAIN_DIR to your satoshi client blockchain folder.
+2.  Set environment variable BLOCKCHAIN_DIR to your satoshi client blockchain folder.
     E.g. if your blockchain folder is e:\Coindata\Bitcoin\ then:
     go to Properties->Debugging->Environment and type: BLOCKCHAIN_DIR=E:\Coindata\Bitcoin
 
-0.  Compile.
+3.  Compile.
 
 Try it on Linux
 ---------------
-
 * Compute simple blockchain stats, full chain parse (15 minutes with 34 GB blockchain in May 2015):
-
 ```
 ./parser simpleStats
 ```
 
 * Extract all transactions for popular address 1dice6wBxymYi3t94heUAG6MpG5eceLG1 (28 minutes):
-
 ```
 ./parser transactions 06f1b66fa14429389cbffa656966993eab656f37
 ```
 
 * Compute the closure of an address, that is the list of addresses that provably belong to the same person.
   (This function is turned off in Windows because of excessive RAM usage):
-
 ```
 ./parser closure 06f1b66fa14429389cbffa656966993eab656f37
 ```
 
 * Compute and print the balance for the top 1000 keys (33 minutes):
-
 ```
 ./parser allBalances -l 1000 -w 1000 > allBalances.txt
 ```
 
 * See how much of the BTC 10K pizza tainted each of the TX in the chain
-
 ```
 ./parser taint >pizzaTaint.txt
 ```
 
 * See all the block rewards and fees:
-
 ```
 ./parser rewards >rewards.txt
 ```
 
 * See a greatly detailed dump of the pizza transaction
-
 ```
 ./parser show
 ```
 
 Try it on Windows
 -----------------
-
 * Open a command line. Set environment variable BLOCKCHAIN_DIR to your satoshi client blockchain folder.
   E.g. if your blockchain folder is e:\Coindata\Bitcoin\ type:
 ```
@@ -104,11 +92,10 @@ blockparser.exe simpleStats
 
 Caveats
 -------
-
 * According to choosen argument it needs quite a bit of RAM to work. As of May 2015 with a 34 GB blockchain:
-    simpleStats uses 300 MB.
-    allBalances uses 2.5 GB.
-    closure uses too much memory, 8 GB in my machine is not enough, so I switched it off in Windows build.
+  * simpleStats uses 300 MB.
+  * allBalances uses 2.5 GB.
+  * closure uses too much memory, 8 GB in my machine is not enough, so I switched it off in Windows build.
 
 * The code isn't particularly clean or well architected. It was just a quick way for me to learn
   about bitcoin. There isnt much in the way of comments either.
@@ -122,16 +109,14 @@ Caveats
 
 Hacking the code
 ----------------
-
 * parser.cpp contains a generic parser that mmaps the blockchain, parses it and calls
   "user-defined" callbacks as it hits interesting bits of information.
 
 * util.cpp contains a grab-bag of useful bitcoin related routines. Interesting examples include:
-
-        showScript
-        getBaseReward
-        solveOutputScript
-        decompressPublicKey
+  * showScript
+  * getBaseReward
+  * solveOutputScript
+  * decompressPublicKey
 
 * cb/allBalances.cpp -- code to all balance of all addresses
 * cb/closure.cpp -- code to compute the transitive closure of an address
@@ -146,12 +131,11 @@ Hacking the code
 
 * You can very easily add your own custom command. You can use the existing callbacks in
   directory ./cb/ as a template to build your own:
-
-        cp cb/allBalances.cpp cb/myExtractor.cpp
-        Add to Makefile
-        Hack away
-        Recompile
-        Run
+  * cp cb/allBalances.cpp cb/myExtractor.cpp
+  * Add to Makefile
+  * Hack away
+  * Recompile
+  * Run
 
 * You can also read the file callback.h (the base class from which you derive to implement your
   own new commands). It has been heavily commented and should provide a good basis to pick what
@@ -165,15 +149,11 @@ Hacking the code
 
 Thanks
 ------
-Thanks to the Bitcoin Core developers for base58, ripemd160 and sha256 implementation
-
-Thanks to Jason Lee for uint128_t
-
-Thanks to johnnyw for gettimeofday.c
-
-Thanks to stathis for precompiled openssl library
+* Thanks to the Bitcoin Core developers for base58, ripemd160 and sha256 implementation
+* Thanks to Jason Lee for uint128_t
+* Thanks to johnnyw for gettimeofday.c
+* Thanks to stathis for precompiled openssl library
 
 License
 -------
-
 Code is in the public domain.
