@@ -153,6 +153,7 @@ Thanks
 * Thanks to Jason Lee for uint128_t
 * Thanks to johnnyw for gettimeofday.c
 * Thanks to stathis for precompiled openssl library
+* Thanks to Toni Ronkko for dirent API
 
 License
 -------
