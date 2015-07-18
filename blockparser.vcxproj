@@ -65,7 +65,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -269,6 +269,7 @@
     <ClInclude Include="crypto\ripemd160.h" />
     <ClInclude Include="crypto\sha256.h" />
     <ClInclude Include="errlog.h" />
+    <ClInclude Include="windows\dirent.h" />
     <ClInclude Include="windows\google\sparsehash\internal\densehashtable.h" />
     <ClInclude Include="windows\google\sparsehash\internal\hashtable-common.h" />
     <ClInclude Include="windows\google\sparsehash\internal\libc_allocator_with_realloc.h" />

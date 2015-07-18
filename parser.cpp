@@ -6,7 +6,6 @@
 
 #include <string>
 #include <vector>
-#include <fcntl.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -635,13 +634,6 @@ static void getBlockHeader(
     size_t         &earlyMissCnt,
     const uint8_t *p
 ) {
-
-    LOAD(uint32_t, magic, p);
-    if(unlikely(gExpectedMagic!=magic)) {
-        hash = 0;
-        return;
-    }
-
     LOAD(uint32_t, sz, p);
     size = sz;
     prev = 0;
@@ -672,6 +664,28 @@ static void getBlockHeader(
     }
 }
 
+static bool seekForBlockStart(CacheableMap* map)
+{
+    uint32_t magic = 0;
+    do
+    {
+        uint8_t magic_buf[4];
+        auto nbRead = map->mapRead(magic_buf, sizeof(gExpectedMagic));
+        if (nbRead<(signed)sizeof(gExpectedMagic)) {
+            return false;
+        }
+        uint8_t* buf = magic_buf;
+        LOAD(uint32_t, m, buf);
+        magic = m;
+    } while (magic == 0);
+
+    if (gExpectedMagic != magic)
+    {
+        return false;
+    }
+    return true;
+}
+
 static void buildBlockHeaders() {
 
     info("pass 1 -- walk all blocks and build headers ...");
@@ -679,7 +693,7 @@ static void buildBlockHeaders() {
     size_t nbBlocks = 0;
     uint64_t baseOffset = 0;
     size_t earlyMissCnt = 0;
-    uint8_t buf[8+gHeaderSize];
+    uint8_t buf[4+gHeaderSize];
     const auto sz = sizeof(buf);
     const auto startTime = usecs();
     const auto oneMeg = 1024 * 1024;
@@ -689,6 +703,11 @@ static void buildBlockHeaders() {
         startMap(0);
 
         while(1) {
+
+            if (!seekForBlockStart(map))
+            {
+                break;
+            }
 
             auto nbRead = map->mapRead(buf, sz);
             if(nbRead<(signed)sz) {
@@ -709,7 +728,7 @@ static void buildBlockHeaders() {
                 break;
             }
 
-            auto where = map->mapSeek((blockSize + 8) - sz, SEEK_CUR);
+            auto where = map->mapSeek((blockSize + 4) - sz, SEEK_CUR);
             auto blockOffset = where - blockSize;
             if (where == std::numeric_limits<std::size_t>::max()) {
                 break;
@@ -853,26 +872,36 @@ static void makeBlockMaps() {
 # define S_ISDIR(ST_MODE) (((ST_MODE)& _S_IFMT) == _S_IFDIR)
 #endif
 
-    auto oldStyle = (r<0 || !S_ISDIR(statBuf.st_mode));
-
-    int blkDatId = (oldStyle ? 1 : 0);
+    const bool oldStyle = (r<0 || !S_ISDIR(statBuf.st_mode));
+    uint32_t blkDatId = 0;
     auto fmt = oldStyle ? "/blk%04d.dat" : "/blocks/blk%05d.dat";
-    while(1) {
+    std::vector<std::string> blockFiles = getBlockFiles(blockDir);
+    while (1) {
 
-        char buf[64];
-        sprintf(buf, fmt, blkDatId++);
+        std::string blockMapFileName;
+        if (blockFiles.size() > 0)
+        {
+            if (blkDatId >= blockFiles.size())
+            {
+                break;
+            }
+            blockMapFileName = blockDir + "/" + blockFiles[blkDatId];
+        }
+        else
+        {
+            char buf[64];
+            sprintf(buf, fmt, oldStyle ? blkDatId + 1 : blkDatId);
+            blockMapFileName = blockChainDir + std::string(buf);
+        }
+        
+        ++blkDatId;
+        CacheableMap* map = new CacheableMap();
+        map->mName = blockMapFileName;
 
-        auto blockMapFileName =
-            blockChainDir +
-            std::string(buf)
-        ;
+        auto blockMapFD = map->mapOpen();
 
-        auto blockMapFD = open(blockMapFileName.c_str(), O_RDONLY
-            #ifdef WIN32
-                | O_BINARY
-            #endif // WIN32
-                );
         if(blockMapFD<0) {
+            delete map;
             if(1<blkDatId) {
                 break;
             }
@@ -902,24 +931,10 @@ static void makeBlockMaps() {
         }
 #endif // WIN32
 
-        CacheableMap* map = new CacheableMap();
-        map->mSize = statBuf.st_size;
-        map->mFd = blockMapFD;
-        map->mName = blockMapFileName;
-        mapVec.push_back(map);
-    }
-}
+        map->mapClose();
 
-static void cleanMaps() {
-    for (auto mapIt = mapVec.cbegin(); mapIt != mapVec.cend(); ++mapIt) {
-        auto map = *mapIt;
-        auto r = close(map->mFd);
-        if(r<0) {
-            sysErr(
-                "failed to close block chain file %s",
-                map->mName.c_str()
-            );
-        }
+        map->mSize = statBuf.st_size;
+        mapVec.push_back(map);
     }
 }
 
@@ -938,7 +953,6 @@ int main(
     computeBlockHeights();
     wireLongestChain();
     parseLongestChain();
-    cleanMaps();
 
     auto elapsed = (usecs() - start)*1e-6;
     info("all done in %.2f seconds\n", elapsed);

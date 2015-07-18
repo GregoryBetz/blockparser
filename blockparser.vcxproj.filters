@@ -274,6 +274,9 @@
     <ClInclude Include="windows\time_port.h">
       <Filter>windows</Filter>
     </ClInclude>
+    <ClInclude Include="windows\dirent.h">
+      <Filter>windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="windows\google\dense_hash_map">

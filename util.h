@@ -10,6 +10,7 @@
 #else
     #include <unistd.h>
 #endif // WIN32
+    #include <fcntl.h>
     #include <memory_manager.h>
 
 #ifndef WIN32
@@ -74,6 +75,28 @@
         static CacheableMap* OneLoadedMap;
         size_t mOffset = 0;
 
+        int mapOpen()
+        {
+            mFd = open(mName.c_str(), O_RDONLY
+                #ifdef WIN32
+                    | O_BINARY
+                #endif // WIN32
+                );
+            return mFd;
+        }
+
+        void mapClose()
+        {
+            auto r = close(mFd);
+            mFd = 0;
+            if (r<0) {
+                sysErr(
+                    "failed to close block chain file %s",
+                    mName.c_str()
+                    );
+            }
+        }
+
         int mapRead(uint8_t *_buf, int _size)
         {
             int length = std::min((int)_size, (int)mSize - (int)mOffset);
@@ -108,6 +131,7 @@
 
         const uint8_t *getData(size_t _offset) {
             if (likely(0 == mData)) {
+                mapOpen();
                 #ifdef WIN32
                 auto where = _lseeki64(mFd, 0, SEEK_SET);
                 #else
@@ -132,10 +156,13 @@
                 auto sz = read(mFd, mData, mSize);
                 if (sz != (signed)mSize) {
                     sysErrFatal(
-                        "can't map block %s",
-                        mName.c_str()
+                        "can't map block %s (size: %d, read: %d)",
+                        mName.c_str(),
+                        mSize,
+                        sz
                         );
                 }
+                mapClose();
             }
             if (OneLoadedMap != this)
             {
@@ -594,5 +621,7 @@
     }
 
     const char *getInterestingAddr();
+
+    std::vector<std::string> getBlockFiles(std::string);
 
 #endif // __UTIL_H__

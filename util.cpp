@@ -891,4 +891,32 @@ void writeEscapedBinaryBuffer(
     }
 }
 
+#include <dirent.h>
+
+std::vector<std::string> getBlockFiles(std::string blockFolder)
+{
+    DIR           *d;
+    struct dirent *dir;
+    d = opendir(blockFolder.c_str());
+    std::vector<std::string> blockFiles;
+    if (!d)
+    {
+        return blockFiles;
+    }
+    while ((dir = readdir(d)) != NULL)
+    {
+        std::string filename(dir->d_name);
+        if (filename.size() == 12 &&
+            filename.substr(0, 3) == "blk" &&
+            filename.substr(8, 4) == ".dat"
+            )
+        {
+            blockFiles.push_back(filename);
+        }
+    }
+
+    closedir(d);
+    return blockFiles;
+}
+
 CacheableMap* CacheableMap::OneLoadedMap = NULL;
