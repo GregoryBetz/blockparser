@@ -130,7 +130,7 @@ struct TxInputs : public Callback {
                 
                 InputData *data = new InputData();
                 data->nbOutputs = nbOutputs;
-                data->nbInputs = nbInputs;
+                data->nbInputs = maxInputCountInTx;
                 data->volume = volume;
 
                 txMap[tmpTxHash] = data;
