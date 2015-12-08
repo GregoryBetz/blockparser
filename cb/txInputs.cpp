@@ -80,6 +80,7 @@ struct TxInputs : public Callback {
 
             printf("    The TX found: ");
             showHex(txHash);
+            printf("\n");
             printf("    maxInputCountInTx = %s\n", P(maxInputCountInTx));
             printf("    nbOutputs = %s\n", P(nbOutputs));
             printf("    volume = %s\n", P(volume));
@@ -96,6 +97,11 @@ struct TxInputs : public Callback {
                 nbOutputs = tmpOutputs;
                 volume = tmpVolume;
                 showHex(tmpTxHash);
+                printf("\n");
+                printf("    maxInputCountInTx = %s\n", P(maxInputCountInTx));
+                printf("    nbOutputs = %s\n", P(nbOutputs));
+                printf("    volume = %s\n", P(volume));
+                printf("\n");
                 memcpy(txHash, tmpTxHash, 256);
             }   
             tmpMaxInputCountInTx = 0; 
