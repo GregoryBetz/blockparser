@@ -68,6 +68,10 @@ struct TxInputs : public Callback {
         uint64_t      outputScriptSize
     ) {
         tmpVolume += value;
+        if (txHash != nullptr)
+        {         
+            memcpy(tmpTxHash, txHash, 256);
+        }
     }
 
     virtual void wrapup() {
@@ -94,10 +98,6 @@ struct TxInputs : public Callback {
                 showHex(tmpTxHash);
                 memcpy(txHash, tmpTxHash, 256);
             }   
-            if (hash != nullptr)
-            {         
-                memcpy(tmpTxHash, hash, 256);
-            }
             tmpMaxInputCountInTx = 0; 
             tmpOutputs = 0;
             tmpVolume = 0;
