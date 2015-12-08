@@ -48,6 +48,8 @@ struct TxInputs : public Callback {
 
     // temporary counters for current Tx
     const uint8_t *tmpTxHash;
+    uint8_t nullHash[32];
+
     uint128_t tmpMaxInputCountInTx;     
     uint128_t tmpOutputs;
     uint128_t tmpVolume; 
@@ -104,7 +106,11 @@ struct TxInputs : public Callback {
         uint64_t      outputScriptSize) 
     {
         tmpVolume += value;
-        tmpTxHash = txHash;
+        if (txHash == nullptr) {
+            tmpTxHash = nullHash;
+        } else {
+            tmpTxHash = txHash;
+        }
     }
 
     virtual void wrapup() 
