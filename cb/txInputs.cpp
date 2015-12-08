@@ -66,7 +66,7 @@ struct TxInputs : public Callback {
 
     virtual const char                   *name() const         { return "txInputs"; }
     virtual const optparse::OptionParser *optionParser() const { return &parser;       }
-    virtual bool                       needUpstream() const    { return false;         }
+    virtual bool                       needUpstream() const    { return true;         }
 
     virtual void aliases(
         std::vector<const char*> &v) const 
