@@ -92,10 +92,10 @@ struct TxInputs : public Callback {
                 nbOutputs = tmpOutputs;
                 volume = tmpVolume;
                 showHex(hash);
-                memcpy(txHash, tmpTxHash, 256);
+                //memcpy(txHash, tmpTxHash, 256);
             }            
-            showHex(hash);
-            memcpy(tmpTxHash, hash, 256);
+            //showHex(hash);
+            //memcpy(tmpTxHash, hash, 256);
             tmpMaxInputCountInTx = 0; 
             tmpOutputs = 0;
             tmpVolume = 0;
