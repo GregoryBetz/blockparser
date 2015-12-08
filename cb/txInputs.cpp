@@ -6,13 +6,41 @@
 #include <option.h>
 #include <callback.h>
 
+
+typedef struct InputData {
+    uint128_t nbInputs;
+    uint128_t nbOutputs;
+    uint128_t value;
+} InputData;
+
+typedef GoogMap<
+    Hash256,
+    InputData *,
+    Hash256Hasher,
+    Hash256Equal
+>::Map TxMap;
+
+
+
+void printInputData(InputData *data)
+{
+    printf("\n");
+    #define P(x) (pr128(x).c_str())
+        printf("    maxInputCountInTx = %s\n", P(data->maxInputCountInTx));
+        printf("    nbOutputs = %s\n", P(data->nbOutputs));
+        printf("    volume = %s\n", P(data->volume));
+        printf("\n");
+    #undef P
+}
+
+
 struct TxInputs : public Callback {
 
     optparse::OptionParser parser;
 
     
     // global Tx with maximum nb of inputs
-    uint8_t txHash[32];
+    TxMap txMap;
 
     uint128_t maxInputCountInTx; 
     uint128_t nbOutputs; 
@@ -39,16 +67,24 @@ struct TxInputs : public Callback {
     virtual bool                       needUpstream() const    { return false;         }
 
     virtual void aliases(
-        std::vector<const char*> &v
-    ) const {
+        std::vector<const char*> &v) const 
+    {
         v.push_back("txinputs");
         v.push_back("tx_inputs");
     }
 
+
+
     virtual int init(
         int argc,
-        const char *argv[]
-    ) {
+        const char *argv[]) 
+    {
+        // Init the txMap
+        static uint8_t empty[kSHA256ByteSize] = { 0x42 };
+        static uint64_t sz = 15 * 1000 * 1000;
+        txMap.setEmptyKey(empty);
+        txMap.resize(sz);
+
         volume = 0;
         nbOutputs = 0;
         maxInputCountInTx = 0;
@@ -65,26 +101,24 @@ struct TxInputs : public Callback {
         const uint8_t *txHash,
         uint64_t      outputIndex,
         const uint8_t *outputScript,
-        uint64_t      outputScriptSize
-    ) {
+        uint64_t      outputScriptSize) 
+    {
         tmpVolume += value;
         tmpTxHash = txHash;
     }
 
-    virtual void wrapup() {
-        printf("\n");
-        #define P(x) (pr128(x).c_str())
-
-            printf("    The TX found: ");
-            showHex(txHash);
-            printf("\n");
-            printf("    maxInputCountInTx = %s\n", P(maxInputCountInTx));
-            printf("    nbOutputs = %s\n", P(nbOutputs));
-            printf("    volume = %s\n", P(volume));
-            printf("\n");
-
-        #undef P
+    virtual void wrapup() 
+    {
+        auto e = txMap.end();
+        auto i = txMap.begin();
+        while ( i!= e) 
+        {            
+            showHex(i->first);
+            printInputData(i->second);
+            ++i;
+        }
     }
+
 
     virtual void startTX(const uint8_t *p, const uint8_t *hash) 
     { 
@@ -93,15 +127,13 @@ struct TxInputs : public Callback {
                 maxInputCountInTx = tmpMaxInputCountInTx;
                 nbOutputs = tmpOutputs;
                 volume = tmpVolume;
-                showHex(tmpTxHash);
-                printf("\n");
-                #define P(x) (pr128(x).c_str())
-                    printf("    maxInputCountInTx = %s\n", P(maxInputCountInTx));
-                    printf("    nbOutputs = %s\n", P(nbOutputs));
-                    printf("    volume = %s\n", P(volume));
-                    printf("\n");
-                #undef P
-                memcpy(txHash, tmpTxHash, 32);
+                
+                InputData *data = new InputData();
+                data.nbOutputs = nbOutputs;
+                data.nbInputs = nbInputs;
+                data.volume = volume;
+
+                txMap[tmpTxHash] = data;
             }   
             tmpMaxInputCountInTx = 0; 
             tmpOutputs = 0;
