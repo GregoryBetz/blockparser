@@ -11,11 +11,14 @@ struct TxInputs : public Callback {
     optparse::OptionParser parser;
 
     
+    // global Tx with maximum nb of inputs
+    uint128_t maxInputCountInTx; 
+    uint128_t nbOutputs; 
 
-    uint128_t maxInputCountInTx; // global max
-    uint128_t tmpMaxInputCountInTx; // temporary counter for current Tx
-    
-    uint128_t nbOutputs;
+
+    // temporary counters for current Tx
+    uint128_t tmpMaxInputCountInTx;     
+    uint128_t tmpOutputs; 
     
 
     TxInputs() {
@@ -43,8 +46,10 @@ struct TxInputs : public Callback {
         const char *argv[]
     ) {
         nbOutputs = 0;
-
         maxInputCountInTx = 0;
+
+        tmpOutputs = 0;
+        tmpMaxInputCountInTx = 0;
 
         return 0;
     }
@@ -76,14 +81,20 @@ struct TxInputs : public Callback {
             if (tmpMaxInputCountInTx > maxInputCountInTx) 
             {
                 maxInputCountInTx = tmpMaxInputCountInTx;
+                nbOutputs = tmpOutputs;
+
             }
             tmpMaxInputCountInTx = 0; 
+            tmpOutputs = 0;
     }
     virtual void      startInput(const uint8_t *p                     ) 
     { 
         ++tmpMaxInputCountInTx; 
     }
-    virtual void     startOutput(const uint8_t *p                     ) { ++nbOutputs;     }
+    virtual void     startOutput(const uint8_t *p                     ) 
+    { 
+        ++tmpOutputs;     
+    }
 };
 
 static TxInputs txInputs;
