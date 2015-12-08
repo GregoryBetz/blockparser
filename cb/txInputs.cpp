@@ -75,7 +75,7 @@ struct TxInputs : public Callback {
         #define P(x) (pr128(x).c_str())
 
             printf("    The TX found: ");
-            showHex(txHash);
+            // showHex(txHash);
             printf("    maxInputCountInTx = %s\n", P(maxInputCountInTx));
             printf("    nbOutputs = %s\n", P(nbOutputs));
             printf("    volume = %s\n", P(volume));
