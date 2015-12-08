@@ -10,7 +10,7 @@
 typedef struct InputData {
     uint128_t nbInputs;
     uint128_t nbOutputs;
-    uint128_t value;
+    uint128_t volume;
 } InputData;
 
 typedef GoogMap<
@@ -26,7 +26,7 @@ void printInputData(InputData *data)
 {
     printf("\n");
     #define P(x) (pr128(x).c_str())
-        printf("    maxInputCountInTx = %s\n", P(data->maxInputCountInTx));
+        printf("    maxInputCountInTx = %s\n", P(data->nbInputs));
         printf("    nbOutputs = %s\n", P(data->nbOutputs));
         printf("    volume = %s\n", P(data->volume));
         printf("\n");
@@ -129,9 +129,9 @@ struct TxInputs : public Callback {
                 volume = tmpVolume;
                 
                 InputData *data = new InputData();
-                data.nbOutputs = nbOutputs;
-                data.nbInputs = nbInputs;
-                data.volume = volume;
+                data->nbOutputs = nbOutputs;
+                data->nbInputs = nbInputs;
+                data->volume = volume;
 
                 txMap[tmpTxHash] = data;
             }   
