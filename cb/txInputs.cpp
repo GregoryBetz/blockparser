@@ -68,10 +68,8 @@ struct TxInputs : public Callback {
         uint64_t      outputScriptSize
     ) {
         tmpVolume += value;
-        if (txHash != nullptr)
-        {         
-            memcpy(tmpTxHash, txHash, 256);
-        }
+        uint256_t nullHash;
+        memcpy(tmpTxHash, txHash, sizeof(nullHash));
     }
 
     virtual void wrapup() {
