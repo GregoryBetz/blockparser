@@ -57,14 +57,13 @@ struct TxInputs : public Callback {
         const uint8_t *outputScript,
         uint64_t      outputScriptSize
     ) {
-        volume += value;
+        // volume += value;
     }
 
     virtual void wrapup() {
         printf("\n");
         #define P(x) (pr128(x).c_str())
 
-            printf("    nbInputs = %s\n", P(nbInputs));
             printf("    maxInputCountInTx = %s\n", P(maxInputCountInTx));
             printf("    nbOutputs = %s\n", P(nbOutputs));
             printf("\n");
@@ -74,7 +73,6 @@ struct TxInputs : public Callback {
 
     virtual void         startTX(const uint8_t *p, const uint8_t *hash) 
     { 
-            ++nbTransactions; 
             if (tmpMaxInputCountInTx > maxInputCountInTx) 
             {
                 maxInputCountInTx = tmpMaxInputCountInTx;
@@ -83,7 +81,6 @@ struct TxInputs : public Callback {
     }
     virtual void      startInput(const uint8_t *p                     ) 
     { 
-        ++nbInputs; 
         ++tmpMaxInputCountInTx; 
     }
     virtual void     startOutput(const uint8_t *p                     ) { ++nbOutputs;     }
