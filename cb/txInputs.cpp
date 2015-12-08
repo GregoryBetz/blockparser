@@ -68,7 +68,7 @@ struct TxInputs : public Callback {
         uint64_t      outputScriptSize
     ) {
         tmpVolume += value;
-        memcpy(tmpTxHash, txHash, 32;
+        memcpy(tmpTxHash, txHash, 32);
     }
 
     virtual void wrapup() {
