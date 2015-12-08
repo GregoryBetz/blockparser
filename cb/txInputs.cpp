@@ -12,14 +12,14 @@ struct TxInputs : public Callback {
 
     
     // global Tx with maximum nb of inputs
-    uint8_t txHash[256];
+    uint8_t txHash[32];
 
     uint128_t maxInputCountInTx; 
     uint128_t nbOutputs; 
     uint128_t volume;
 
     // temporary counters for current Tx
-    uint8_t tmpTxHash[256];
+    uint8_t tmpTxHash[32];
     uint128_t tmpMaxInputCountInTx;     
     uint128_t tmpOutputs;
     uint128_t tmpVolume; 
@@ -68,11 +68,7 @@ struct TxInputs : public Callback {
         uint64_t      outputScriptSize
     ) {
         tmpVolume += value;
-        uint256_t nullHash;
-        if (0 != memcmp(nullHash.v, txHash, sizeof(nullHash))) 
-        {
-            memcpy(tmpTxHash, txHash, sizeof(nullHash));
-        }
+        memcpy(tmpTxHash, txHash, 32;
     }
 
     virtual void wrapup() {
@@ -105,7 +101,7 @@ struct TxInputs : public Callback {
                     printf("    volume = %s\n", P(volume));
                     printf("\n");
                 #undef P
-                memcpy(txHash, tmpTxHash, 256);
+                memcpy(txHash, tmpTxHash, 32);
             }   
             tmpMaxInputCountInTx = 0; 
             tmpOutputs = 0;
