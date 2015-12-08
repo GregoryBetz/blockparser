@@ -69,7 +69,10 @@ struct TxInputs : public Callback {
     ) {
         tmpVolume += value;
         uint256_t nullHash;
-        memcpy(tmpTxHash, txHash, sizeof(nullHash));
+        if (0 != memcmp(nullHash.v, txHash, sizeof(nullHash))) 
+        {
+            memcpy(tmpTxHash, txHash, sizeof(nullHash));
+        }
     }
 
     virtual void wrapup() {
