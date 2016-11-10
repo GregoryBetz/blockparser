@@ -46,7 +46,7 @@ struct Pristine:public Callback {
     ) {
         info("Finding all pristine blocks in blockchain");
         static uint8_t empty[kSHA256ByteSize] = { 0x42 };
-        static uint64_t sz = 15 * 1000 * 1000;
+        static unsigned int sz = 15 * 1000 * 1000;
         txMap.setEmptyKey(empty);
         txMap.resize(sz);
         nbPristine = 0;

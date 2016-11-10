@@ -1,5 +1,6 @@
 blockparser
 ===========
+A fairly fast, quick and dirty bitcoin whole blockchain parser.
 
     Who wrote it ?
     --------------
@@ -194,7 +195,12 @@ blockparser
 
         . Compute the closure of an address, that is the list of addresses that very probably belong to the same person:
 
-            ./parser closure 06f1b66fa14429389cbffa656966993eab656f37
+Caveats
+-------
+* According to choosen argument it needs quite a bit of RAM to work. As of May 2015 with a 34 GB blockchain:
+  * simpleStats uses 300 MB.
+  * allBalances uses 2.5 GB.
+  * closure uses too much memory, 8 GB in my machine is not enough, so I switched it off in Windows build.
 
         . Compute and print the balance for all keys ever used since the beginning of time:
 
@@ -204,15 +210,33 @@ blockparser
           (chances are you have some dust coming from that famous TX lingering on one
           of your addresses)
 
-            ./parser taint >pizzaTaint.txt
+Hacking the code
+----------------
+* parser.cpp contains a generic parser that mmaps the blockchain, parses it and calls
+  "user-defined" callbacks as it hits interesting bits of information.
 
-        . See all the block rewards and fees:
+* util.cpp contains a grab-bag of useful bitcoin related routines. Interesting examples include:
+  * showScript
+  * getBaseReward
+  * solveOutputScript
+  * decompressPublicKey
 
-            ./parser rewards >rewards.txt
+* cb/allBalances.cpp -- code to all balance of all addresses
+* cb/closure.cpp -- code to compute the transitive closure of an address
+* cb/dumpTX.cpp -- code to display a transaction in very great detail
+* cb/help.cpp -- code to dump detailed help for all other commands
+* cb/pristine.cpp -- code to show all "pristine" (i.e. unspent) blocks
+* cb/rewards.cpp -- code to show all block rewards (including fees)
+* cb/simpleStats.cpp -- code to compute simple stats.
+* cb/sql.cpp -- code to product an SQL dump of the blockchain
+* cb/taint.cpp -- code to compute the taint from a given TX to all TXs
+* cb/transactions.cpp -- code to extract all transactions pertaining to an address
 
         . See a greatly detailed dump of the famous pizza transaction
 
-            ./parser show
+* You can also read the file callback.h (the base class from which you derive to implement your
+  own new commands). It has been heavily commented and should provide a good basis to pick what
+  to overload to achieve your goal.
 
         . Track all mined blocks with unspent reward:
 

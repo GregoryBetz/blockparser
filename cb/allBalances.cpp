@@ -6,8 +6,8 @@
 #include <common.h>
 #include <errlog.h>
 #include <option.h>
-#include <rmd160.h>
-#include <sha256.h>
+#include <rmd160port.h>
+#include <sha256port.h>
 #include <callback.h>
 
 #include <vector>
@@ -19,8 +19,9 @@ struct Addr;
 struct AllBalances;
 AllBalances *theObject;
 static uint8_t emptyKey[kSHA256ByteSize] = { 0x52 };
-typedef GoogMap<Hash160, Addr*, Hash160Hasher, Hash160Equal>::Map AddrMap;
-typedef GoogMap<Hash160, int, Hash160Hasher, Hash160Equal>::Map RestrictMap;
+static uint8_t deletedKey[kSHA256ByteSize] = { 0x53 };
+typedef HashMap<TypedHash160, Addr*, TypedHash160Hasher, TypedHash160Equal>::Map AddrMap;
+typedef HashMap<Hash160, int, Hash160Hasher, Hash160Equal>::Map RestrictMap;
 
 struct Output {
     int64_t time;
@@ -37,7 +38,7 @@ struct Addr {
     uint64_t sum;
     uint64_t nbIn;
     uint64_t nbOut;
-    uint160_t hash;
+    uint168_t hash;
     uint32_t lastIn;
     uint32_t lastOut;
     OutputVec *outputVec;
@@ -45,6 +46,8 @@ struct Addr {
 
 template<> uint8_t *PagedAllocator<Addr>::pool = 0;
 template<> uint8_t *PagedAllocator<Addr>::poolEnd = 0;
+template<> long long PagedAllocator<Addr>::AllocatedMemory = 0;
+template<> std::vector<uint8_t*> PagedAllocator<Addr>::garbageCollection(0);
 static inline Addr *allocAddr() { return (Addr*)PagedAllocator<Addr>::alloc(); }
 
 struct CompareAddr {
@@ -56,8 +59,16 @@ struct CompareAddr {
     }
 };
 
-struct AllBalances:public Callback {
+template< typename tPair >
+struct second_t {
+    typename tPair::second_type operator()(const tPair& p) const { return p.second; }
+};
 
+template< typename tMap >
+second_t< typename tMap::value_type > second(const tMap& m) { return second_t<typename tMap::value_type >(); }
+
+struct AllBalances:public Callback
+{
     bool csv;
     bool isDone;
     bool detailed;
@@ -172,8 +183,8 @@ struct AllBalances:public Callback {
         firstBlock = 0;
 
         addrMap.setEmptyKey(emptyKey);
+        addrMap.set_deleted_key(deletedKey);
         addrMap.resize(15 * 1000 * 1000);
-        allAddrs.reserve(15 * 1000 * 1000);
 
 	optparse::Values &values = parser.parse_args(argc, argv);
 
@@ -271,7 +282,6 @@ struct AllBalances:public Callback {
             }
 
             addrMap[addr->hash.v] = addr;
-            allAddrs.push_back(addr);
         }
 
         if(0<value) {
@@ -292,6 +302,11 @@ struct AllBalances:public Callback {
             output.inputIndex = inputIndex;
             output.outputIndex = outputIndex;
             addr->outputVec->push_back(output);
+        }
+        else if (addr->sum == 0)
+        {
+            addrMap.erase(addr->hash.v);
+            PagedAllocator<Addr>::free(addr);
         }
     }
 
@@ -350,6 +365,9 @@ struct AllBalances:public Callback {
     }
 
     virtual void wrapup() {
+
+        allAddrs.clear();
+        std::transform(addrMap.begin(), addrMap.end(), std::back_inserter(allAddrs), second(addrMap));
 
         CompareAddr compare;
         auto e = allAddrs.end();
@@ -494,9 +512,7 @@ struct AllBalances:public Callback {
         curBlock = b;
 
         const uint8_t *p = b->chunk->getData();
-        const uint8_t *sz = -4 + p;
-        LOAD(uint32_t, size, sz);
-        offset += size;
+        offset += b->chunk->getSize();
 
         double now = Timer::usecs();
         static double startTime = 0;
@@ -510,6 +526,9 @@ struct AllBalances:public Callback {
                 startTime = now;
             }
 
+            double progress = (double)offset / (double)chainSize;
+            double elasedSinceStart = 1e-6*(now - startTime);
+            double speed = progress / elasedSinceStart;
             info(
                 "%8" PRIu64 " blocks, "
                 "%8.3f MegaAddrs , "

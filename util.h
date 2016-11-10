@@ -5,6 +5,7 @@
     #include <vector>
 
     #include <common.h>
+    #include <algorithm>
     #include <errlog.h>
     #include <rmd160.h>
     #include <sha256.h>
@@ -27,6 +28,10 @@
     struct Hash160Hasher { uint64_t operator()( const Hash160 &hash160) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash160); const uint64_t *p = reinterpret_cast<const uint64_t*>(i); return p[0]; } };
     struct Hash256Hasher { uint64_t operator()( const Hash256 &hash256) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash256); const uint64_t *p = reinterpret_cast<const uint64_t*>(i); return p[0]; } };
 
+    struct Hash160Hasher { size_t operator()(const Hash160 &hash160) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash160); const size_t *p = reinterpret_cast<const size_t*>(i); return p[0]; } };
+    struct TypedHash160Hasher { size_t operator()(const TypedHash160 &hash160) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash160); const size_t *p = reinterpret_cast<const size_t*>(i); return p[0]; } };
+    struct Hash256Hasher { size_t operator()(const Hash256 &hash256) const { uintptr_t i = reinterpret_cast<uintptr_t>(hash256); const size_t *p = reinterpret_cast<const size_t*>(i); return p[0]; } };
+
     struct Hash160Equal {
         bool operator()(
             const Hash160 &ha,
@@ -43,6 +48,15 @@
             const uint32_t *b1 = reinterpret_cast<const uint32_t *>(ib);
             if(unlikely(a1[4]!=b1[4])) return false;
             return true;
+        }
+    };
+
+    struct TypedHash160Equal {
+        bool operator()(
+            const TypedHash160 &ha,
+            const TypedHash160 &hb
+        ) const {
+            return memcmp(ha, hb, 1 + kRIPEMD160ByteSize) == 0;
         }
     };
 
@@ -63,29 +77,46 @@
         }
     };
 
-    template<
-        typename T,
-        size_t   kPageSize = 16384
-    >
-    struct PagedAllocator {
+    struct CacheableMap {
+        CacheableMap(){}
+        int mFd;
+        unsigned int mSize;
+        std::string mName;
+        static CacheableMap* OneLoadedMap;
+        size_t mOffset = 0;
 
-        static uint8_t *pool;
-        static uint8_t *poolEnd;
-        enum { kPageByteSize = sizeof(T)*kPageSize };
-
-        static uint8_t *alloc() {
-            if(unlikely(poolEnd<=pool)) {
-                pool = (uint8_t*)malloc(kPageByteSize);
-                poolEnd = kPageByteSize + pool;
-            }
-            uint8_t *result = pool;
-            pool += sizeof(T);
-            return result;
+        int mapOpen()
+        {
+            mFd = open(mName.c_str(), O_RDONLY
+                #ifdef WIN32
+                    | O_BINARY
+                #endif // WIN32
+                );
+            return mFd;
         }
-    };
 
-    static inline uint8_t *allocHash256() { return PagedAllocator<uint256_t>::alloc(); }
-    static inline uint8_t *allocHash160() { return PagedAllocator<uint160_t>::alloc(); }
+        void mapClose()
+        {
+            auto r = close(mFd);
+            mFd = 0;
+            if (r<0) {
+                sysErr(
+                    "failed to close block chain file %s",
+                    mName.c_str()
+                    );
+            }
+        }
+
+        int mapRead(uint8_t *_buf, int _size)
+        {
+            int length = std::min((int)_size, (int)mSize - (int)mOffset);
+            if (length > 0)
+            {
+                memcpy(_buf, getData(mOffset), length);
+                mOffset += length;
+            }
+            return length;
+        }
 
     struct BlockFile {
         int fd;
@@ -121,13 +152,19 @@
                         "failed to seek into block chain file %s",
                         blockFile->name.c_str()
                     );
-                }
-                data = (uint8_t*)malloc(size);
+            }
+            data = (uint8_t*)malloc(size);
 
                 auto sz = read(blockFile->fd, data, size);
                 if(sz!=(signed)size) {
                     //fatal("can't read block");
                 }
+            }
+        }
+
+        const uint8_t *getData() const {
+            if (likely(0 == data)) {
+                lazyInit();
             }
             return data;
         }
@@ -143,6 +180,19 @@
 
         static Chunk *alloc() {
             return (Chunk*)PagedAllocator<Chunk>::alloc();
+        }
+    };
+    
+    struct TXChunk {
+    private: // dont copy
+        TXChunk(const TXChunk&);
+        TXChunk& operator=(const TXChunk&);
+    public:
+        TXChunk() {}
+        uint8_t** mRawData;
+        
+        static TXChunk *alloc() {
+            return (TXChunk*)PagedAllocator<TXChunk>::alloc();
         }
     };
 
@@ -175,7 +225,7 @@
         }
     };
 
-    #if defined NO_GOOGLE_MAP
+    #if defined DENSE_HASH
 
         #include <unordered_map>
 
@@ -185,7 +235,7 @@
             typename Hasher,
             typename Equal
         >
-        struct GoogMap {
+        struct HashMap {
 
             typedef std::unordered_map<
                 Key,
@@ -208,19 +258,18 @@
             };
         };
 
-    #else
-        #if defined(WANT_DENSE)
+    #elif defined SPARSE_HASH
 
             // Faster, uses more RAM
             #include <google/dense_hash_map>
 
-            template<
-                typename Key,
-                typename Value,
-                typename Hasher,
-                typename Equal
-            >
-            struct GoogMap {
+        template<
+            typename Key,
+            typename Value,
+            typename Hasher,
+            typename Equal
+        >
+        struct HashMap {
 
                 typedef google::dense_hash_map<
                     Key,
@@ -267,7 +316,31 @@
                 };
             };
 
-        #endif
+    #else
+    
+        #include <unordered_map>
+        template<
+            typename Key,
+            typename Value,
+            typename Hasher,
+            typename Equal
+        >
+        struct HashMap {
+
+            typedef std::unordered_map<
+                Key,
+                Value,
+                Hasher,
+                Equal
+            > MapBase;
+
+            struct Map:public MapBase {
+                void setEmptyKey(const Key &){}
+                void set_deleted_key(const Key &){}
+                void resize(uint64_t) {}
+            };
+        };
+
     #endif
 
     #if defined(DEBUG)
@@ -377,7 +450,7 @@
         const uint8_t *buf,
         uint64_t      size
     ) {
-        sha256(sha, buf, size);
+        sha256(sha, buf, (size_t)size);
         sha256(sha, sha, kSHA256ByteSize);
     }
 
@@ -411,8 +484,8 @@
     bool addrToHash160(
               uint8_t *hash160,
         const uint8_t *addr,
-                 bool checkHash = false,
-                 bool verbose = true
+              uint8_t &type,
+                 bool checkHash = false
     );
 
     bool guessHash160(
@@ -489,5 +562,7 @@
     }
 
     const char *getInterestingAddr();
+
+    std::vector<std::string> getBlockFiles(std::string);
 
 #endif // __UTIL_H__

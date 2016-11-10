@@ -1,12 +1,14 @@
 
 // Dump the transitive closure of a bunch of addresses
 
+#ifdef __HAS_BOOST__
+
 #include <util.h>
 #include <timer.h>
 #include <common.h>
 #include <errlog.h>
 #include <option.h>
-#include <rmd160.h>
+#include <rmd160port.h>
 #include <callback.h>
 
 #include <vector>
@@ -16,6 +18,7 @@
 
 typedef uint160_t Addr;
 static uint8_t gEmptyKey[kRIPEMD160ByteSize] = { 0x52 };
+typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> Graph;
 
 typedef GoogMap<
     Hash160,
@@ -153,7 +156,7 @@ struct Closure : public Callback {
                 count = 1;
             } else {
                 uint64_t addrIndex = j->second;
-                uint64_t homeComponentIndex = cc[addrIndex];
+                uint64_t homeComponentIndex = cc[(unsigned int)addrIndex];
                 for(size_t k=0; likely(k<cc.size()); ++k) {
                     uint64_t componentIndex = cc[k];
                     if(unlikely(homeComponentIndex==componentIndex)) {
@@ -183,7 +186,7 @@ struct Closure : public Callback {
             for(size_t i=1; unlikely(i<size); ++i) {
                 uint64_t a = vertices[i-1];
                 uint64_t b = vertices[i-0];
-                boost::add_edge(a, b, graph);
+                boost::add_edge((unsigned int)a, (unsigned int)b, graph);
             }
         }
     }
@@ -191,3 +194,4 @@ struct Closure : public Callback {
 
 static Closure closure;
 
+#endif // __HAS_BOOST__

@@ -69,7 +69,7 @@ struct RawDump:public Callback {
         uint64_t    chainSize
     ) {
         txIdInBlock = 0;
-        currBlock = b->height;
+        currBlock = (uint32_t)b->height;
 
         printf(
             "%sblock%d = {\n",
@@ -79,7 +79,7 @@ struct RawDump:public Callback {
         push();
 
         printf(
-            "%ssize = %" PRIu64 "\n",
+            "%ssize = %d\n",
             spaces,
             b->chunk->getSize()
         );
@@ -161,7 +161,7 @@ struct RawDump:public Callback {
 
         printf("%sscript = '\n", spaces);
             pop();
-                showScript(p, inputScriptSize, 0, (const char *)spaces);
+                showScript(p, (size_t)inputScriptSize, 0, (const char *)spaces);
             push();
         printf("%s'\n", spaces);
 
@@ -179,7 +179,7 @@ struct RawDump:public Callback {
             push();
                 canonicalHexDump(
                     p,
-                    inputScriptSize,
+                    (size_t)inputScriptSize,
                     (const char *)spaces
                 );
             pop();
@@ -281,7 +281,7 @@ struct RawDump:public Callback {
         );
 
         printf("%sscript = '\n", spaces);
-        showScript(outputScript, outputScriptSize, 0, (const char *)spaces);
+        showScript(outputScript, (size_t)outputScriptSize, 0, (const char *)spaces);
         printf("%s'\n", spaces);
 
         showScriptInfo(outputScript, outputScriptSize, spaces);

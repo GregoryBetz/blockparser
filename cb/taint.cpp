@@ -31,8 +31,8 @@
 #include <callback.h>
 
 typedef long double Number;
-typedef GoogMap<Hash256, int, Hash256Hasher, Hash256Equal >::Map TxMap;
-typedef GoogMap<Hash256, Number, Hash256Hasher, Hash256Equal >::Map TaintMap;
+typedef HashMap<Hash256, int, Hash256Hasher, Hash256Equal >::Map TxMap;
+typedef HashMap<Hash256, Number, Hash256Hasher, Hash256Equal >::Map TaintMap;
 
 static inline void printNumber(
     const Number &x
@@ -100,7 +100,7 @@ struct Taint : public Callback {
         }
 
         static uint8_t empty[kSHA256ByteSize] = { 0x42 };
-        static uint64_t sz = 15 * 1000 * 1000;
+        static unsigned int sz = 15 * 1000 * 1000;
         srcTxMap.setEmptyKey(empty);
         taintMap.setEmptyKey(empty);
         taintMap.resize(sz);

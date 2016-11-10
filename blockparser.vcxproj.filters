@@ -1,0 +1,298 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="cb">
+      <UniqueIdentifier>{3f30119f-a7ca-4820-9f6c-cc623c7e408c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scrypt">
+      <UniqueIdentifier>{567bba57-36d1-41db-bf8d-569d5a2fc4d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="h9">
+      <UniqueIdentifier>{025c8810-dcbb-4cfc-95fd-f6200f9f0bd5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="crypto">
+      <UniqueIdentifier>{a71978c0-6f75-4142-b936-2d6912b19c5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="windows">
+      <UniqueIdentifier>{9b60206e-3082-4b24-92aa-afc790239af4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="windows\google">
+      <UniqueIdentifier>{b44fe262-2ba4-43fd-8a84-6810717b3765}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="windows\google\sparsehash">
+      <UniqueIdentifier>{7ebf65f0-476d-453a-8f57-d49835df86ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="windows\google\sparsehash\internal">
+      <UniqueIdentifier>{83bef884-b816-4ba2-b679-b4e77540a942}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="windows\openssl">
+      <UniqueIdentifier>{9f6ce744-b1d0-4b39-86de-a979f31b1a59}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="cb\allBalances.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\closure.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\dumpTX.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\help.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\pristine.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\rawdump.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\rewards.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\simpleStats.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\sql.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\taint.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="cb\transactions.cpp">
+      <Filter>cb</Filter>
+    </ClCompile>
+    <ClCompile Include="scrypt\pbkdf2.cpp">
+      <Filter>scrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="scrypt\scrypt.cpp">
+      <Filter>scrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\aes_helper.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\blake.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\bmw.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\cubehash.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\echo.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\groestl.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\jh.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\keccak.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\luffa.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\shavite.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\simd.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="h9\skein.c">
+      <Filter>h9</Filter>
+    </ClCompile>
+    <ClCompile Include="callback.cpp" />
+    <ClCompile Include="opcodes.cpp" />
+    <ClCompile Include="option.cpp" />
+    <ClCompile Include="parser.cpp" />
+    <ClCompile Include="util.cpp" />
+    <ClCompile Include="crypto\base58.cpp">
+      <Filter>crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="crypto\ripemd160.cpp">
+      <Filter>crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="crypto\sha256.cpp">
+      <Filter>crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="sha256port.cpp" />
+    <ClCompile Include="rmd160port.cpp" />
+    <ClCompile Include="memory_manager.cpp" />
+    <ClCompile Include="windows\uint128_t.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+    <ClCompile Include="windows\time_port.cpp">
+      <Filter>windows</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="scrypt\scrypt.h">
+      <Filter>scrypt</Filter>
+    </ClInclude>
+    <ClInclude Include="scrypt\pbkdf2.h">
+      <Filter>scrypt</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\h9.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_blake.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_bmw.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_cubehash.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_echo.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_groestl.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_jh.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_keccak.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_luffa.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_shavite.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_simd.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_skein.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\sph_types.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="h9\uint256.h">
+      <Filter>h9</Filter>
+    </ClInclude>
+    <ClInclude Include="util.h" />
+    <ClInclude Include="callback.h" />
+    <ClInclude Include="common.h" />
+    <ClInclude Include="errlog.h" />
+    <ClInclude Include="opcodes.h" />
+    <ClInclude Include="option.h" />
+    <ClInclude Include="windows\openssl\asn1.h">
+      <Filter>windows\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\openssl\bio.h">
+      <Filter>windows\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\openssl\bn.h">
+      <Filter>windows\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\openssl\crypto.h">
+      <Filter>windows\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\openssl\e_os2.h">
+      <Filter>windows\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\openssl\ec.h">
+      <Filter>windows\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\openssl\ecdsa.h">
+      <Filter>windows\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\openssl\obj_mac.h">
+      <Filter>windows\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\openssl\opensslconf.h">
+      <Filter>windows\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\openssl\opensslv.h">
+      <Filter>windows\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\openssl\ossl_typ.h">
+      <Filter>windows\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\openssl\ripemd.h">
+      <Filter>windows\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\openssl\safestack.h">
+      <Filter>windows\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\openssl\sha.h">
+      <Filter>windows\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\openssl\stack.h">
+      <Filter>windows\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\openssl\symhacks.h">
+      <Filter>windows\openssl</Filter>
+    </ClInclude>
+    <ClInclude Include="crypto\base58.h">
+      <Filter>crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="crypto\common.h">
+      <Filter>crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="crypto\ripemd160.h">
+      <Filter>crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="crypto\sha256.h">
+      <Filter>crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="sha256port.h" />
+    <ClInclude Include="rmd160port.h" />
+    <ClInclude Include="memory_manager.h" />
+    <ClInclude Include="windows\google\sparsehash\template_util.h">
+      <Filter>windows\google\sparsehash</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\google\sparsehash\type_traits.h">
+      <Filter>windows\google\sparsehash</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\google\sparsehash\internal\densehashtable.h">
+      <Filter>windows\google\sparsehash\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\google\sparsehash\internal\hashtable-common.h">
+      <Filter>windows\google\sparsehash\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\google\sparsehash\internal\libc_allocator_with_realloc.h">
+      <Filter>windows\google\sparsehash\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\google\sparsehash\internal\sparseconfig.h">
+      <Filter>windows\google\sparsehash\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\google\sparsehash\internal\sparsehashtable.h">
+      <Filter>windows\google\sparsehash\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\uint128_t.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\time_port.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+    <ClInclude Include="windows\dirent.h">
+      <Filter>windows</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="windows\google\dense_hash_map">
+      <Filter>windows\google</Filter>
+    </None>
+    <None Include="windows\google\sparse_hash_map">
+      <Filter>windows\google</Filter>
+    </None>
+    <None Include="windows\google\sparsehash\dense_hash_map">
+      <Filter>windows\google\sparsehash</Filter>
+    </None>
+    <None Include="windows\google\sparsehash\sparse_hash_map">
+      <Filter>windows\google\sparsehash</Filter>
+    </None>
+    <None Include="windows\google\sparsehash\sparsetable">
+      <Filter>windows\google\sparsehash</Filter>
+    </None>
+  </ItemGroup>
+</Project>

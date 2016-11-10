@@ -1,0 +1,11 @@
+*.obj
+*.tlog
+*.d
+*.o
+Debug/*
+blockparser.opensdf
+blockparser.v12.suo
+parser
+blockparser.sdf
+Release/*
+x64/*

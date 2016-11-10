@@ -12,24 +12,45 @@
 #include <alloca.h>
 #include <common.h>
 #include <errlog.h>
-#include <rmd160.h>
-#include <sha256.h>
+#include <rmd160port.h>
+#include <sha256port.h>
 #include <opcodes.h>
 
+#include <string>
+#include <stdio.h>
+#include <string.h>
+#ifdef WIN32
+#include <time_port.h>
+#include <algorithm> // for std::min
+#else
+#include <sys/time.h>
+#endif // WIN32
+#include <crypto/base58.h>
+#include <openssl/ecdsa.h>
+#include <openssl/obj_mac.h>
+
 const uint8_t hexDigits[] = "0123456789abcdef";
-const uint8_t b58Digits[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 template<> uint8_t *PagedAllocator<Block>::pool = 0;
 template<> uint8_t *PagedAllocator<Block>::poolEnd = 0;
-
-template<> uint8_t *PagedAllocator<uint256_t>::pool = 0;
-template<> uint8_t *PagedAllocator<uint256_t>::poolEnd = 0;
-
-template<> uint8_t *PagedAllocator<uint160_t>::pool = 0;
-template<> uint8_t *PagedAllocator<uint160_t>::poolEnd = 0;
+template<> long long PagedAllocator<Block>::AllocatedMemory = 0;
+template<> std::vector<uint8_t*> PagedAllocator<Block>::garbageCollection(0);
 
 template<> uint8_t *PagedAllocator<Chunk>::pool = 0;
 template<> uint8_t *PagedAllocator<Chunk>::poolEnd = 0;
+template<> long long PagedAllocator<Chunk>::AllocatedMemory = 0;
+template<> std::vector<uint8_t*> PagedAllocator<Chunk>::garbageCollection(0);
+
+template<> uint8_t *PagedAllocator<TXChunk>::pool = 0;
+template<> uint8_t *PagedAllocator<TXChunk>::poolEnd = 0;
+template<> long long PagedAllocator<TXChunk>::AllocatedMemory = 0;
+template<> std::vector<uint8_t*> PagedAllocator<TXChunk>::garbageCollection(0);
+
+double usecs() {
+    struct timeval t;
+    gettimeofday(&t, 0);
+    return double(t.tv_usec + 1000000*((uint64_t)t.tv_sec));
+}
 
 void toHex(
           uint8_t *dst,     // 2*size +1
@@ -664,6 +685,8 @@ bool addrToHash160(
 
     bool hashOK = true;
     if(checkHash) {
+        uint8_t checkSum[4];
+        memcpy(checkSum, &vchRet[1 + kRIPEMD160ByteSize], 4);
 
         uint8_t data[1+kRIPEMD160ByteSize];
         memcpy(1+data, hash160, kRIPEMD160ByteSize);
@@ -673,10 +696,10 @@ bool addrToHash160(
         sha256Twice(sha, data, 1+kRIPEMD160ByteSize);
 
         hashOK =
-            sha[0]==checkSumStart[0]  &&
-            sha[1]==checkSumStart[1]  &&
-            sha[2]==checkSumStart[2]  &&
-            sha[3]==checkSumStart[3];
+            sha[0]==checkSum[0]  &&
+            sha[1]==checkSum[1]  &&
+            sha[2]==checkSum[2]  &&
+            sha[3]==checkSum[3];
 
         if(!hashOK) {
             warning(
@@ -713,10 +736,10 @@ void hash160ToAddr(
     buf[ 4] = 0;
     buf[ 5] = getCoinType() + type;
     sha256Twice(
-        4 + 2 + kRIPEMD160ByteSize + buf,
-        4 + 1 + buf,
+        1 + kRIPEMD160ByteSize + buf,
+        buf,
         1 + kRIPEMD160ByteSize
-    );
+        );
 
     static BIGNUM *b58 = 0;
     static BIGNUM *num = 0;
@@ -797,7 +820,8 @@ bool guessHash160(
         return true;
     }
 
-    return addrToHash160(hash160, addr, true, verbose);
+    uint8_t type;
+    return addrToHash160(hash160, addr, type, true);
 }
 
 static bool addAddr(
@@ -849,7 +873,6 @@ void loadKeyList(
         size_t sz = strlen(buf);
         if('\n'==buf[sz-1]) buf[sz-1] = 0;
 
-        uint160_t h160;
         bool ok = addAddr(result, (uint8_t*)buf, verbose);
         if(ok) {
             ++found;
@@ -946,7 +969,7 @@ std::string pr128(
     auto x = y;
     while(1) {
         *(p--) = (char)((x % 10) + '0');
-        if(unlikely(0==x)) break;
+        if(unlikely(x==0)) break;
         x /= 10;
     }
     ++p;
@@ -1228,3 +1251,32 @@ void writeEscapedBinaryBuffer(
     }
 }
 
+#include <dirent.h>
+
+std::vector<std::string> getBlockFiles(std::string blockFolder)
+{
+    DIR           *d;
+    struct dirent *dir;
+    d = opendir(blockFolder.c_str());
+    std::vector<std::string> blockFiles;
+    if (!d)
+    {
+        return blockFiles;
+    }
+    while ((dir = readdir(d)) != NULL)
+    {
+        std::string filename(dir->d_name);
+        if (filename.size() == 12 &&
+            filename.substr(0, 3) == "blk" &&
+            filename.substr(8, 4) == ".dat"
+            )
+        {
+            blockFiles.push_back(filename);
+        }
+    }
+
+    closedir(d);
+    return blockFiles;
+}
+
+CacheableMap* CacheableMap::OneLoadedMap = NULL;

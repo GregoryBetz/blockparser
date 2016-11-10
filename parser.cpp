@@ -16,6 +16,8 @@
 #if !defined(S_ISDIR)
     #define S_ISDIR(mode) (S_IFDIR==((mode) & S_IFMT))
 #endif
+typedef HashMap<Hash256, TXChunk*, Hash256Hasher, Hash256Equal>::Map TXOMap;
+typedef HashMap<Hash256, Block*, Hash256Hasher, Hash256Equal>::Map BlockMap;
 
 typedef GoogMap<
     Hash256,
@@ -33,6 +35,7 @@ typedef GoogMap<
 
 static bool gNeedUpstream;
 static Callback *gCallback;
+static std::vector<CacheableMap*> mapVec;
 
 static const BlockFile *gCurBlockFile;
 static std::vector<BlockFile> blockFiles;
@@ -40,12 +43,15 @@ static std::vector<BlockFile> blockFiles;
 static TXOMap gTXOMap;
 static BlockMap gBlockMap;
 static uint8_t empty[kSHA256ByteSize] = { 0x42 };
+static uint8_t deleted[kSHA256ByteSize] = { 0x43 };
 
 static Block *gMaxBlock;
 static Block *gNullBlock;
 static int64_t gMaxHeight;
 static uint64_t gChainSize;
 static uint256_t gNullHash;
+
+static const size_t gHeightLimit = std::numeric_limits<std::size_t>::max();
 
 static double getMem() {
 
@@ -219,8 +225,7 @@ static void parseOutput(
     const uint8_t *downTXHash,
     uint64_t      downInputIndex,
     const uint8_t *downInputScript,
-    uint64_t      downInputScriptSize,
-    bool          found = false
+    uint64_t      downInputScriptSize
 ) {
     if(!skip && !fullContext) {
         startOutput(p);
@@ -232,7 +237,7 @@ static void parseOutput(
         auto outputScript = p;
         p += outputScriptSize;
 
-        if(!skip && fullContext && found) {
+        if(!skip && fullContext) {
             edge(
                 value,
                 txHash,
@@ -259,41 +264,44 @@ static void parseOutput(
 }
 
 template<
-    bool skip,
-    bool fullContext
+    bool skip
 >
 static void parseOutputs(
     const uint8_t *&p,
     const uint8_t *txHash,
-    uint64_t      stopAtIndex = -1,
-    const uint8_t *downTXHash = 0,
-    uint64_t      downInputIndex = 0,
-    const uint8_t *downInputScript = 0,
-    uint64_t      downInputScriptSize = 0
+    TXChunk       *txo
 ) {
-    if(!skip && !fullContext) {
+    if(!skip) {
         startOutputs(p);
     }
+    
+    LOAD_VARINT(nbOutputs, p);
+    if(!skip && txo)
+    {
+        txo->mRawData = allocPtrs((int)nbOutputs);
+    }
 
-        LOAD_VARINT(nbOutputs, p);
-        for(uint64_t outputIndex=0; outputIndex<nbOutputs; ++outputIndex) {
-            auto found = (fullContext && !skip && (stopAtIndex==outputIndex));
-            parseOutput<skip, fullContext>(
-                p,
-                txHash,
-                outputIndex,
-                downTXHash,
-                downInputIndex,
-                downInputScript,
-                downInputScriptSize,
-                found
-            );
-            if(found) {
-                break;
-            }
+    for(uint64_t outputIndex=0; outputIndex<nbOutputs; ++outputIndex) {
+        auto outputStart = p;
+        parseOutput<skip, false>(
+            p,
+            txHash,
+            outputIndex,
+            0,
+            0,
+            0,
+            0
+        );
+        if(!skip && txo)
+        {
+            int s = (int)(p - outputStart);
+            uint8_t* data = allocTX(s);
+            memcpy(data, outputStart, s);
+            txo->mRawData[outputIndex] = data;
         }
+    }
 
-    if(!skip && !fullContext) {
+    if(!skip) {
         endOutputs(p);
     }
 }
@@ -320,6 +328,7 @@ static void parseInput(
                 if(unlikely(gTXOMap.end()==i)) {
                     errFatal("failed to locate upstream transaction");
                 }
+                upTXHashOrig = i->first;
                 upTX = i->second;
             }
         }
@@ -328,23 +337,32 @@ static void parseInput(
         LOAD(uint32_t, upOutputIndex, p);
         LOAD_VARINT(inputScriptSize, p);
 
-        if(!skip && 0!=upTX) {
-            auto inputScript = p;
-            auto upTXOutputs = upTX->getData();
-                parseOutputs<false, true>(
-                    upTXOutputs,
-                    upTXHash,
-                    upOutputIndex,
-                    txHash,
-                    inputIndex,
-                    inputScript,
-                    inputScriptSize
-                );
-            upTX->releaseData();
+    if(!skip && 0!=upTX) {
+        auto inputScript = p;
+        const uint8_t * rawData = upTX->mRawData[upOutputIndex];
+        parseOutput<false, true>(
+            rawData,
+            upTXHash,
+            upOutputIndex,
+            txHash,
+            inputIndex,
+            inputScript,
+            inputScriptSize
+        );
+        freeTX(upTX->mRawData[upOutputIndex]);
+        upTX->mRawData[upOutputIndex] = 0;
+        int unspendOutputCount = countNonNullPtrs(upTX->mRawData);
+        if(unspendOutputCount == 0)
+        {
+            gTXOMap.erase(upTXHash);
+            freePtrs(upTX->mRawData);
+            PagedAllocator<TXChunk>::free(upTX);
+            PagedAllocator<uint256_t>::free(upTXHashOrig);
         }
+    }
 
-        p += inputScriptSize;
-        SKIP(uint32_t, sequence, p);
+    p += inputScriptSize;
+    SKIP(uint32_t, sequence, p);
 
     if(!skip) {
         endInput(p);
@@ -420,7 +438,7 @@ static void parseTX(
             txoOffset = block->chunk->getOffset() + (p - block->chunk->getData());
         }
 
-        parseOutputs<skip, false>(p, txHash);
+        parseOutputs<skip>(p, txHash, txo);
 
         if(txo) {
             size_t txoSize = p - outputsStart;
@@ -451,7 +469,6 @@ static bool parseBlock(
     startBlock(block);
         auto p = block->chunk->getData();
 
-            auto header = p;
             SKIP(uint32_t, version, p);
             SKIP(uint256_t, prevBlkHash, p);
             SKIP(uint256_t, blkMerkleRoot, p);
@@ -493,6 +510,8 @@ static void parseLongestChain() {
 
     auto startTime = Timer::usecs();
     gCallback->startLC();
+    auto startTime = usecs();
+    uint64_t currentOffset = 0;
 
         uint64_t bytesSoFar =  0;
         auto blk = gNullBlock->next;
@@ -536,7 +555,9 @@ static void parseLongestChain() {
     fprintf(stderr, "                                                          \r");
     gCallback->wrapup();
 
-    info("pass 4 -- done.");
+    auto now = usecs();
+    auto elapsed = now - startTime;
+    info("pass 4  -- took %.0f secs                                                           ", elapsed*1e-6);
 }
 
 static void wireLongestChain() {
@@ -603,7 +624,7 @@ static void findBlockParent(
         b->chunk->getOffset(),
         SEEK_SET
     );
-    if(where!=(signed)b->chunk->getOffset()) {
+    if(where!=b->chunk->getOffset()) {
         sysErrFatal(
             "failed to seek into block chain file %s",
             b->chunk->getBlockFile()->name.c_str()
@@ -709,13 +730,6 @@ static void getBlockHeader(
     size_t        &earlyMissCnt,
     const uint8_t *p
 ) {
-
-    LOAD(uint32_t, magic, p);
-    if(unlikely(gExpectedMagic!=magic)) {
-        hash = 0;
-        return;
-    }
-
     LOAD(uint32_t, sz, p);
     size = sz;
     prev = 0;
@@ -748,14 +762,36 @@ static void getBlockHeader(
     }
 }
 
+static bool seekForBlockStart(CacheableMap* map)
+{
+    uint32_t magic = 0;
+    do
+    {
+        uint8_t magic_buf[4];
+        auto nbRead = map->mapRead(magic_buf, sizeof(gExpectedMagic));
+        if (nbRead<(signed)sizeof(gExpectedMagic)) {
+            return false;
+        }
+        uint8_t* buf = magic_buf;
+        LOAD(uint32_t, m, buf);
+        magic = m;
+    } while (magic == 0);
+
+    if (gExpectedMagic != magic)
+    {
+        return false;
+    }
+    return true;
+}
+
 static void buildBlockHeaders() {
 
     info("pass 1 -- walk all blocks and build headers ...");
 
     size_t nbBlocks = 0;
-    size_t baseOffset = 0;
+    uint64_t baseOffset = 0;
     size_t earlyMissCnt = 0;
-    uint8_t buf[8+gHeaderSize];
+    uint8_t buf[4+gHeaderSize];
     const auto sz = sizeof(buf);
     const auto startTime = Timer::usecs();
     const auto oneMeg = 1024 * 1024;
@@ -770,12 +806,15 @@ static void buildBlockHeaders() {
             if(nbRead<(signed)sz) {
                 break;
             }
+            
+            if (nbBlocks >= gHeightLimit)
+                break;
 
             startBlock((uint8_t*)0);
 
             uint8_t *hash = 0;
             Block *prevBlock = 0;
-            size_t blockSize = 0;
+            unsigned int blockSize = 0;
 
             getBlockHeader(
                 blockSize,
@@ -790,7 +829,7 @@ static void buildBlockHeaders() {
 
             auto where = lseek(blockFile.fd, (blockSize + 8) - sz, SEEK_CUR);
             auto blockOffset = where - blockSize;
-            if(where<0) {
+            if (where == std::numeric_limits<std::size_t>::max()) {
                 break;
             }
 
@@ -857,8 +896,12 @@ static void initHashtables() {
     info("initializing hash tables");
 
     gTXOMap.setEmptyKey(empty);
+    gTXOMap.set_deleted_key(deleted);
     gBlockMap.setEmptyKey(empty);
 
+    gChainSize = 0;
+    for (auto mapIt = mapVec.cbegin(); mapIt != mapVec.cend(); ++mapIt) {
+        gChainSize += (*mapIt)->mSize;
     auto kAvgBytesPerTX = 542.0;
     auto nbTxEstimate = (size_t)(1.1 * (gChainSize / kAvgBytesPerTX));
     if(gNeedUpstream) {
@@ -901,6 +944,9 @@ static std::string getNormalizedDirName(
     const std::string &dirName
 ) {
 
+#ifdef WIN32
+    auto r = dirName;
+#else
     auto t = canonicalize_file_name(dirName.c_str());
     if(0==t) {
         errFatal(
@@ -911,6 +957,7 @@ static std::string getNormalizedDirName(
 
     auto r = std::string(t);
     free(t);
+#endif // WIN32
 
     auto sz = r.size();
     if(0<sz) {
@@ -931,9 +978,12 @@ static std::string getBlockchainDir() {
         }
     }
     return getNormalizedDirName(
-        dir              +
+        std::string(dir)
+#ifndef WIN32
+        +
         std::string("/") +
         kCoinDirName
+#endif // WIN32
     );
 }
 
@@ -947,14 +997,36 @@ static void findBlockFiles() {
 
     struct stat statBuf;
     auto r = stat(blockDir.c_str(), &statBuf);
-    auto oldStyle = (r<0 || !S_ISDIR(statBuf.st_mode));
 
-    int blkDatId = (oldStyle ? 1 : 0);
+#ifndef S_ISDIR
+# define S_ISDIR(ST_MODE) (((ST_MODE)& _S_IFMT) == _S_IFDIR)
+#endif
+
+    const bool oldStyle = (r<0 || !S_ISDIR(statBuf.st_mode));
+    uint32_t blkDatId = 0;
     auto fmt = oldStyle ? "/blk%04d.dat" : "/blocks/blk%05d.dat";
-    while(1) {
+    std::vector<std::string> blockFiles = getBlockFiles(blockDir);
+    while (1) {
 
-        char buf[64];
-        sprintf(buf, fmt, blkDatId++);
+        std::string blockMapFileName;
+        if (blockFiles.size() > 0)
+        {
+            if (blkDatId >= blockFiles.size())
+            {
+                break;
+            }
+            blockMapFileName = blockDir + "/" + blockFiles[blkDatId];
+        }
+        else
+        {
+            char buf[64];
+            sprintf(buf, fmt, oldStyle ? blkDatId + 1 : blkDatId);
+            blockMapFileName = blockChainDir + std::string(buf);
+        }
+        
+        ++blkDatId;
+        CacheableMap* map = new CacheableMap();
+        map->mName = blockMapFileName;
 
         auto fileName = blockChainDir + std::string(buf) ;
         auto fd = open(fileName.c_str(), O_RDONLY);
@@ -1031,7 +1103,33 @@ int main(
 
     auto elapsed = (Timer::usecs() - start)*1e-6;
     info("all done in %.2f seconds", elapsed);
-    info("mem at end = %.3f Gigs\n", getMem());
+#ifdef MEMORY_ANALYSIS
+    info("memory manager total memory consumption: %.2fM", ((double)PagedAllocatorTotalSize) / 1024.0 / 1024.0);
+    info("             - TXChunk consumption: %.2fM", ((double)PagedAllocator<TXChunk>::AllocatedMemory) / 1024.0 / 1024.0);
+    info("             - Chunk consumption: %.2fM", ((double)PagedAllocator<Chunk>::AllocatedMemory) / 1024.0 / 1024.0);
+    info("             - Block consumption: %.2fM", ((double)PagedAllocator<Block>::AllocatedMemory) / 1024.0 / 1024.0);
+    info("             - uint160_t consumption: %.2fM", ((double)PagedAllocator<uint160_t>::AllocatedMemory) / 1024.0 / 1024.0);
+    info("             - uint256_t consumption: %.2fM", ((double)PagedAllocator<uint256_t>::AllocatedMemory) / 1024.0 / 1024.0);
+#define PopularLength(x,y) info("             - uint%d consumption: %.2fM", x, ((double)PagedAllocator<uint##x, y>::AllocatedMemory) / 1024.0 / 1024.0);
+    POPULAR_LENGTH_LIST
+#undef PopularLength
+#define PopularOutput(x,y) info("             - ptrs%d consumption: %.2fM", x, ((double)PagedAllocator<ptrs##x, y>::AllocatedMemory) / 1024.0 / 1024.0);
+        POPULAR_OUTPUT_LIST
+#undef PopularOutput
+
+    info("unique TX rawdata total memory consumption is less then: %.2fM", ((double)UniqueTXTotalSize) / 1024.0 / 1024.0);
+    info("TXs total number: %d", UniqueTXTotalNumber);
+    info("unique PTRs total memory consumption: %.2fM", ((double)UniquePtrsTotalSize) / 1024.0 / 1024.0);
+    info("PTRs total number: %d", UniquePtrsTotalNumber);
+    info("gTXOMap size: %d", gTXOMap.size());;
+
+    for (int i = 0; i < 100; ++i)
+    {
+        fprintf(stderr, "i=%d  \r", 100 - i);
+        auto now = usecs();
+        while (usecs()<now + 1000000);
+    }
+#endif // MEMORY_ANALYSIS
     return 0;
 }
 

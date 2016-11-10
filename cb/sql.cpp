@@ -67,7 +67,7 @@ struct SQLDump : public Callback {
         inputID = 0;
         outputID = 0;
 
-        static uint64_t sz = 32 * 1000 * 1000;
+        static unsigned int sz = 32 * 1000 * 1000;
         outputMap.setEmptyKey(empty);
         outputMap.resize(sz);
 
@@ -263,7 +263,7 @@ struct SQLDump : public Callback {
             (uint32_t)outputIndex
         );
 
-        uint32_t oi = outputIndex;
+        uint32_t oi = (uint32_t)outputIndex;
         uint8_t *h = allocHash256();
         memcpy(h, txHash, kSHA256ByteSize);
 
@@ -286,7 +286,7 @@ struct SQLDump : public Callback {
         uint64_t      inputScriptSize
     ) {
         uint256_t h;
-        uint32_t oi = outputIndex;
+        uint32_t oi = (uint32_t)outputIndex;
         memcpy(h.v, upTXHash, kSHA256ByteSize);
 
         uintptr_t ih = reinterpret_cast<uintptr_t>(h.v);

@@ -82,9 +82,9 @@ struct SimpleStats : public Callback {
             printf("    volume = %.2f (%s satoshis)\n", satoshisToNormaForm(volume), P(volume)); 
             printf("\n");
 
-            printf("    avg tx per block = %.2f\n", nbTransactions/(double)nbValidBlocks);
-            printf("    avg inputs per tx = %.2f\n", nbInputs/(double)nbTransactions);
-            printf("    avg outputs per tx = %.2f\n", nbOutputs/(double)nbTransactions);
+            printf("    avg tx per block = %.2f\n", (double)nbTransactions / (double)nbValidBlocks);
+            printf("    avg inputs per tx = %.2f\n", (double)nbInputs / (double)nbTransactions);
+            printf("    avg outputs per tx = %.2f\n", (double)nbOutputs / (double)nbTransactions);
             printf("    avg output value = %.2f\n", satoshisToNormaForm(volume/(double)nbOutputs));
             printf("\n");
         #undef P

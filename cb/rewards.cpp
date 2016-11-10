@@ -124,9 +124,9 @@ struct Rewards : public Callback {
         if(unlikely(type<0) && 0!=value && fullDump) {
             printf("============================\n");
             printf("BLOCK %d ... RAW ASCII DUMP OF FAILING SCRIPT = ", (int)currBlock);
-            fwrite(outputScript, outputScriptSize, 1, stdout);
+            fwrite(outputScript, (size_t)outputScriptSize, 1, stdout);
             printf("value = %16.8f\n", satoshisToNormaForm(value));
-            showScript(outputScript, outputScriptSize);
+            showScript(outputScript, (size_t)outputScriptSize);
             printf("============================\n\n");
             printf("\n");
             errFatal("invalid script");

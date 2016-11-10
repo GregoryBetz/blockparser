@@ -168,7 +168,7 @@ struct DumpTX:public Callback {
             LOAD(uint256_t, upTXHash, p);
             LOAD(uint32_t, upOutputIndex, p);
             LOAD_VARINT(inputScriptSize, p);
-            showScript(p, inputScriptSize, 0, "        ");
+            showScript(p, (size_t)inputScriptSize, 0, "        ");
 
             isGenTX = (0==memcmp(gNullHash.v, upTXHash.v, sizeof(gNullHash)));
             if(isGenTX) {
@@ -176,7 +176,7 @@ struct DumpTX:public Callback {
                 printf("        generation transaction\n");
                 printf("        based on block height, reward = %.8f\n", satoshisToNormaForm(reward));
                 printf("        hex dump of coinbase follows:\n\n");
-                canonicalHexDump(p, inputScriptSize, "        ");
+                canonicalHexDump(p, (size_t)inputScriptSize, "        ");
                 valueIn += reward;
             }
         }
@@ -200,11 +200,11 @@ struct DumpTX:public Callback {
             printf("        value = %.8f\n", satoshisToNormaForm(value));
             printf("        upTXHash = %s\n\n", buf);
             printf("        # challenge answer script, bytes=%" PRIu64 " (on downstream input) =\n", inputScriptSize);
-            showScript(inputScript, inputScriptSize, 0, "        ");
+            showScript(inputScript, (size_t)inputScriptSize, 0, "        ");
             printf("                           ||\n");
             printf("                           VV\n");
             printf("        # challenge script, bytes=%" PRIu64 " (on upstream output)=\n", outputScriptSize);
-            showScript(outputScript, outputScriptSize, 0, "        ");
+            showScript(outputScript, (size_t)outputScriptSize, 0, "        ");
             showScriptInfo(outputScript, outputScriptSize, (const uint8_t *)"        ");
             valueIn += value;
 
@@ -264,7 +264,7 @@ struct DumpTX:public Callback {
         if(dump) {
             printf("        value = %.8f\n", satoshisToNormaForm(value));
             printf("        challenge script, bytes=%" PRIu64 " :\n", outputScriptSize);
-            showScript(outputScript, outputScriptSize, 0, "        ");
+            showScript(outputScript, (size_t)outputScriptSize, 0, "        ");
             showScriptInfo(outputScript, outputScriptSize, (const uint8_t *)"        ");
             printf("    }\n\n");
             valueOut += value;

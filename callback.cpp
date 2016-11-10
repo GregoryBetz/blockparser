@@ -10,6 +10,24 @@
 #include <errlog.h>
 #include <callback.h>
 
+#if defined(_WIN32) || defined(_WIN64)
+int strncasecmp(const char *s1, const char *s2, size_t n)
+{
+	while (n > 0
+		&& toupper((unsigned char)*s1) == toupper((unsigned char)*s2))
+	{
+		if (*s1 == '\0')
+			return 0;
+		s1++;
+		s2++;
+		n--;
+	}
+	if (n == 0)
+		return 0;
+	return toupper((unsigned char)*s1) - toupper((unsigned char)*s2);
+}
+#endif
+
 static std::vector<Callback*> *callbacks;
 typedef std::map<uintptr_t, Callback*> CBMap;
 
