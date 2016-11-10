@@ -157,6 +157,7 @@ my(@lib) = qw(
     cb/txoTypes.cpp
     cb/allBalances.cpp
     cb/simpleStats.cpp
+    cb/txInputs.cpp
     cb/transactions.cpp
 
     crypto/sha256_btc.cpp

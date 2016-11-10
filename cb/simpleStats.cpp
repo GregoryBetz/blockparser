@@ -13,6 +13,8 @@ struct SimpleStats : public Callback {
     uint128_t volume;
     uint128_t nbBlocks;
     uint128_t nbInputs;
+    uint128_t maxInputCountInTx; // global max
+    uint128_t tmpMaxInputCountInTx; // temporary counter for current Tx
     uint128_t nbOutputs;
     uint128_t nbBlockFiles;
     uint128_t nbValidBlocks;
@@ -48,6 +50,8 @@ struct SimpleStats : public Callback {
         nbBlockFiles = 0;
         nbValidBlocks = 0;
         nbTransactions = 0;
+        maxInputCountInTx = 0;
+
         return 0;
     }
 
@@ -72,6 +76,7 @@ struct SimpleStats : public Callback {
             printf("\n");
 
             printf("    nbInputs = %s\n", P(nbInputs));
+            printf("    maxInputCountInTx = %s\n", P(maxInputCountInTx));
             printf("    nbOutputs = %s\n", P(nbOutputs));
             printf("    nbTransactions = %s\n", P(nbTransactions));
             printf("    volume = %.2f (%s satoshis)\n", satoshisToNormaForm(volume), P(volume)); 
@@ -87,8 +92,20 @@ struct SimpleStats : public Callback {
 
     virtual void startBlockFile(const uint8_t *p                      ) { ++nbBlockFiles;  }
     virtual void      startBlock(const uint8_t *p                     ) { ++nbBlocks;      }
-    virtual void         startTX(const uint8_t *p, const uint8_t *hash) { ++nbTransactions;}
-    virtual void      startInput(const uint8_t *p                     ) { ++nbInputs;      }
+    virtual void         startTX(const uint8_t *p, const uint8_t *hash) 
+    { 
+            ++nbTransactions; 
+            if (tmpMaxInputCountInTx > maxInputCountInTx) 
+            {
+                maxInputCountInTx = tmpMaxInputCountInTx;
+            }
+            tmpMaxInputCountInTx = 0; 
+    }
+    virtual void      startInput(const uint8_t *p                     ) 
+    { 
+        ++nbInputs; 
+        ++tmpMaxInputCountInTx; 
+    }
     virtual void     startOutput(const uint8_t *p                     ) { ++nbOutputs;     }
     virtual void      startBlock(const Block *b, uint64_t             ) { ++nbValidBlocks; }
 };
